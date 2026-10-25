@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytics Ladder</title>
+<meta name="description" content="CIT 355 Week 1 interactive: climb the four levels of sports analytics with Biscayne Bay FC and Biscayne Bay Breakers data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .toggle{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:18px;background:#fff;padding:3px;gap:3px;max-width:100%}
+  .toggle button{font:inherit;font-size:14px;font-weight:600;border:0;background:transparent;padding:7px 16px;border-radius:999px;cursor:pointer;color:var(--ink-2)}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .ladder{display:flex;flex-direction:column-reverse;gap:10px}
+  .rung{display:flex;align-items:center;gap:12px;text-align:left;font:inherit;width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+  .rung:hover{border-color:#C9CED6}
+  .rung[aria-pressed="true"]{border-color:var(--au-red);background:var(--au-red-soft)}
+  .rung .num{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:#EEF1F5;color:var(--ink)}
+  .rung[aria-pressed="true"] .num{background:var(--au-red);color:#fff}
+  .rung .t{font-weight:700}
+  .rung .q{font-size:14px;color:var(--ink-2)}
+  .meter{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:12px}
+  .dots{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}
+  .dots i{width:9px;height:9px;border-radius:50%;background:#E3E6EB;display:inline-block}
+  .dots i.on{background:var(--au-red)}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}
+  .stat{background:var(--bg);border-radius:10px;padding:10px 12px}
+  .stat .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .stat .v{font-size:20px;font-weight:700}
+  .chart{width:100%;height:auto;display:block}
+  .opts{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+  .opts label{display:flex;align-items:center;gap:6px;font-size:15px;background:var(--bg);border-radius:8px;padding:6px 10px;cursor:pointer}
+  .forecast{font-size:28px;font-weight:700;color:var(--au-red-dark)}
+  .qcard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}
+  .qcard .qq{font-weight:600;margin-bottom:8px}
+  .qbtns{display:flex;flex-wrap:wrap;gap:8px}
+  .qbtns .btn.right{background:var(--ok-soft);border-color:#9AD3AE}
+  .qbtns .btn.wrong{background:var(--bad-soft);border-color:#F0A8A8}
+  .note{font-size:13px;color:var(--muted)}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 1 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">Week 1 · Explorer</span>
+    <h1>Analytics ladder</h1>
+    <p class="lede">Sports analytics answers four kinds of questions, from "what happened?" to "what should we do?". Climb the ladder with real numbers from the Biscayne Bay Sports Group and see how each step gets you closer to a decision.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol>
+      <li>Pick a team with the Soccer or Basketball switch.</li>
+      <li>Click each rung of the ladder, starting at the bottom, and read the example for that level.</li>
+      <li>On the predictive rung, change the game facts and watch the attendance forecast move.</li>
+      <li>On the prescriptive rung, read the recommendation and the "check" questions a manager should ask.</li>
+      <li>Finish with the sorting game: place eight front office questions on the right rung.</li>
+    </ol>
+  </details>
+
+  <div style="margin:0 0 16px" class="toggle" role="group" aria-label="Choose a team">
+    <button type="button" id="tSoc" aria-pressed="true">Soccer: Biscayne Bay FC</button>
+    <button type="button" id="tBb" aria-pressed="false">Basketball: Breakers</button>
+  </div>
+
+  <div class="grid two">
+    <section class="card" aria-labelledby="ladH">
+      <h2 id="ladH">The four levels</h2>
+      <p class="note" style="margin-top:0">Each level builds on the one below it. Higher levels are worth more to a decision, and they are harder to get right.</p>
+      <div class="ladder" id="ladder"></div>
+    </section>
+    <section class="card" aria-live="polite">
+      <div id="detail"></div>
+    </section>
+  </div>
+
+  <section class="card" style="margin-top:16px" aria-labelledby="gameH">
+    <h2 id="gameH">Sorting game: which rung is this question on?</h2>
+    <p class="note" style="margin-top:0">Read each question a front office might ask and choose its level. You get instant feedback.</p>
+    <div class="score" style="margin:6px 0 4px"><span>Score</span><span class="big" id="gScore">0</span><span>/ 8</span></div>
+    <div id="qs"></div>
+    <div id="gDone" class="feedback info" hidden></div>
+  </section>
+
+</main>
+
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+const hasGSAP = typeof window.gsap !== 'undefined';
+
+const S_HOME = [{"match_id": "S01", "date": "2026-03-07", "day_of_week": "Saturday", "opponent": "Orlando Pines SC", "rivalry": "Yes", "weather": "Sunny", "promotion": "Fireworks", "attendance": 9631, "avg_ticket_price": 50.0, "result": "L"}, {"match_id": "S03", "date": "2026-03-21", "day_of_week": "Saturday", "opponent": "Atlanta Forge", "rivalry": "No", "weather": "Clear night", "promotion": "Fan giveaway", "attendance": 9368, "avg_ticket_price": 42.0, "result": "W"}, {"match_id": "S05", "date": "2026-04-04", "day_of_week": "Saturday", "opponent": "Nashville Rhythm", "rivalry": "No", "weather": "Clear night", "promotion": "Kids free", "attendance": 9509, "avg_ticket_price": 42.0, "result": "W"}, {"match_id": "S07", "date": "2026-04-19", "day_of_week": "Sunday", "opponent": "Houston Bayou SC", "rivalry": "No", "weather": "Hot and humid", "promotion": "Fan giveaway", "attendance": 8402, "avg_ticket_price": 35.0, "result": "L"}, {"match_id": "S09", "date": "2026-05-02", "day_of_week": "Saturday", "opponent": "Jacksonville Surf", "rivalry": "No", "weather": "Sunny", "promotion": "Fan giveaway", "attendance": 9000, "avg_ticket_price": 35.0, "result": "W"}, {"match_id": "S11", "date": "2026-05-15", "day_of_week": "Friday", "opponent": "Memphis Blues SC", "rivalry": "No", "weather": "Clear night", "promotion": "None", "attendance": 9003, "avg_ticket_price": 35.0, "result": "W"}, {"match_id": "S13", "date": "2026-05-30", "day_of_week": "Saturday", "opponent": "Birmingham Iron", "rivalry": "No", "weather": "Clear night", "promotion": "None", "attendance": 8302, "avg_ticket_price": 42.0, "result": "D"}, {"match_id": "S15", "date": "2026-06-13", "day_of_week": "Saturday", "opponent": "Richmond Rebels", "rivalry": "No", "weather": "Clear night", "promotion": "Fireworks", "attendance": 9058, "avg_ticket_price": 32.0, "result": "W"}, {"match_id": "S17", "date": "2026-06-27", "day_of_week": "Saturday", "opponent": "Sarasota Keys FC", "rivalry": "No", "weather": "Sunny", "promotion": "None", "attendance": 6984, "avg_ticket_price": 42.0, "result": "W"}, {"match_id": "S18", "date": "2026-07-03", "day_of_week": "Friday", "opponent": "Orlando Pines SC", "rivalry": "Yes", "weather": "Sunny", "promotion": "Fan giveaway", "attendance": 10599, "avg_ticket_price": 46.0, "result": "W"}, {"match_id": "S20", "date": "2026-07-19", "day_of_week": "Sunday", "opponent": "Atlanta Forge", "rivalry": "No", "weather": "Sunny", "promotion": "Fan giveaway", "attendance": 8237, "avg_ticket_price": 32.0, "result": "L"}, {"match_id": "S22", "date": "2026-07-31", "day_of_week": "Friday", "opponent": "Nashville Rhythm", "rivalry": "No", "weather": "Clear night", "promotion": "None", "attendance": 8839, "avg_ticket_price": 42.0, "result": "W"}, {"match_id": "S24", "date": "2026-08-15", "day_of_week": "Saturday", "opponent": "Houston Bayou SC", "rivalry": "No", "weather": "Rain", "promotion": "Heritage night", "attendance": 7542, "avg_ticket_price": 38.0, "result": "W"}, {"match_id": "S26", "date": "2026-08-29", "day_of_week": "Saturday", "opponent": "Jacksonville Surf", "rivalry": "No", "weather": "Rain", "promotion": "None", "attendance": 7958, "avg_ticket_price": 32.0, "result": "D"}, {"match_id": "S28", "date": "2026-09-16", "day_of_week": "Wednesday", "opponent": "Memphis Blues SC", "rivalry": "No", "weather": "Clear night", "promotion": "None", "attendance": 6990, "avg_ticket_price": 38.0, "result": "L"}, {"match_id": "S30", "date": "2026-09-26", "day_of_week": "Saturday", "opponent": "Birmingham Iron", "rivalry": "No", "weather": "Clear night", "promotion": "Fan giveaway", "attendance": 9411, "avg_ticket_price": 32.0, "result": "D"}, {"match_id": "S32", "date": "2026-10-11", "day_of_week": "Sunday", "opponent": "Richmond Rebels", "rivalry": "No", "weather": "Clear night", "promotion": "Heritage night", "attendance": 7894, "avg_ticket_price": 38.0, "result": "W"}, {"match_id": "S34", "date": "2026-10-23", "day_of_week": "Friday", "opponent": "Sarasota Keys FC", "rivalry": "No", "weather": "Sunny", "promotion": "None", "attendance": 7599, "avg_ticket_price": 38.0, "result": "D"}];
+const B_HOME = [{"game_id": "B01", "date": "2026-11-07", "day_of_week": "Saturday", "opponent": "Orlando Comets", "rivalry": "Yes", "promotion": "Family pack", "attendance": 5387, "avg_ticket_price": 36.0, "result": "W"}, {"game_id": "B03", "date": "2026-11-13", "day_of_week": "Friday", "opponent": "Jacksonville Jets", "rivalry": "No", "promotion": "None", "attendance": 4988, "avg_ticket_price": 27.0, "result": "W"}, {"game_id": "B05", "date": "2026-11-21", "day_of_week": "Saturday", "opponent": "Charlotte Hornet Hall", "rivalry": "No", "promotion": "None", "attendance": 3971, "avg_ticket_price": 27.0, "result": "L"}, {"game_id": "B07", "date": "2026-11-28", "day_of_week": "Saturday", "opponent": "Birmingham Steel", "rivalry": "No", "promotion": "None", "attendance": 4376, "avg_ticket_price": 30.0, "result": "W"}, {"game_id": "B09", "date": "2026-12-05", "day_of_week": "Saturday", "opponent": "Memphis Kings", "rivalry": "No", "promotion": "None", "attendance": 4374, "avg_ticket_price": 30.0, "result": "W"}, {"game_id": "B11", "date": "2026-12-12", "day_of_week": "Saturday", "opponent": "Orlando Comets", "rivalry": "Yes", "promotion": "None", "attendance": 5374, "avg_ticket_price": 30.0, "result": "W"}, {"game_id": "B13", "date": "2026-12-19", "day_of_week": "Saturday", "opponent": "Jacksonville Jets", "rivalry": "No", "promotion": "None", "attendance": 4833, "avg_ticket_price": 27.0, "result": "W"}, {"game_id": "B15", "date": "2026-12-26", "day_of_week": "Saturday", "opponent": "Charlotte Hornet Hall", "rivalry": "No", "promotion": "Family pack", "attendance": 5333, "avg_ticket_price": 27.0, "result": "W"}, {"game_id": "B17", "date": "2027-01-02", "day_of_week": "Saturday", "opponent": "Birmingham Steel", "rivalry": "No", "promotion": "Halftime concert", "attendance": 4886, "avg_ticket_price": 30.0, "result": "L"}, {"game_id": "B19", "date": "2027-01-09", "day_of_week": "Saturday", "opponent": "Memphis Kings", "rivalry": "No", "promotion": "None", "attendance": 4580, "avg_ticket_price": 27.0, "result": "L"}, {"game_id": "B21", "date": "2027-01-16", "day_of_week": "Saturday", "opponent": "Orlando Comets", "rivalry": "Yes", "promotion": "Student night", "attendance": 5433, "avg_ticket_price": 33.0, "result": "L"}, {"game_id": "B23", "date": "2027-01-22", "day_of_week": "Friday", "opponent": "Jacksonville Jets", "rivalry": "No", "promotion": "Student night", "attendance": 5925, "avg_ticket_price": 24.0, "result": "L"}, {"game_id": "B25", "date": "2027-01-29", "day_of_week": "Friday", "opponent": "Charlotte Hornet Hall", "rivalry": "No", "promotion": "Bobblehead", "attendance": 4808, "avg_ticket_price": 34.0, "result": "L"}, {"game_id": "B27", "date": "2027-02-05", "day_of_week": "Friday", "opponent": "Birmingham Steel", "rivalry": "No", "promotion": "Student night", "attendance": 4616, "avg_ticket_price": 30.0, "result": "L"}, {"game_id": "B29", "date": "2027-02-13", "day_of_week": "Saturday", "opponent": "Memphis Kings", "rivalry": "No", "promotion": "None", "attendance": 4298, "avg_ticket_price": 27.0, "result": "W"}, {"game_id": "B31", "date": "2027-02-20", "day_of_week": "Saturday", "opponent": "Orlando Comets", "rivalry": "Yes", "promotion": "None", "attendance": 5211, "avg_ticket_price": 30.0, "result": "W"}, {"game_id": "B33", "date": "2027-02-27", "day_of_week": "Saturday", "opponent": "Jacksonville Jets", "rivalry": "No", "promotion": "None", "attendance": 4092, "avg_ticket_price": 34.0, "result": "W"}, {"game_id": "B35", "date": "2027-03-05", "day_of_week": "Friday", "opponent": "Charlotte Hornet Hall", "rivalry": "No", "promotion": "None", "attendance": 5033, "avg_ticket_price": 27.0, "result": "W"}, {"game_id": "B37", "date": "2027-03-13", "day_of_week": "Saturday", "opponent": "Birmingham Steel", "rivalry": "No", "promotion": "Family pack", "attendance": 6000, "avg_ticket_price": 24.0, "result": "W"}, {"game_id": "B39", "date": "2027-03-19", "day_of_week": "Friday", "opponent": "Memphis Kings", "rivalry": "No", "promotion": "None", "attendance": 4925, "avg_ticket_price": 34.0, "result": "L"}];
+const TEAMS = {
+  soc: {name:"Biscayne Bay FC", venue:"stadium", cap:12000, games:S_HOME, unit:"match", record:"14 wins, 7 draws, 13 losses", extraLabel:["Dry weather","Rain"], extraTest:g=>g.weather==="Rain"},
+  bb:  {name:"Biscayne Bay Breakers", venue:"arena", cap:6000, games:B_HOME, unit:"game", record:"23 wins, 17 losses", extraLabel:["Saturday","Friday"], extraTest:g=>g.day_of_week==="Friday"}
+};
+let team = "soc", level = 0;
+const fmt = n => Math.round(n).toLocaleString("en-US");
+const mean = a => a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0;
+const sd = a => { const m = mean(a); return Math.sqrt(mean(a.map(x=>(x-m)*(x-m)))); };
+const att = arr => arr.map(g=>g.attendance);
+
+const LEVELS = [
+  {t:"Descriptive", q:"What happened?", value:1, diff:1},
+  {t:"Diagnostic", q:"Why did it happen?", value:2, diff:2},
+  {t:"Predictive", q:"What will happen?", value:3, diff:3},
+  {t:"Prescriptive", q:"What should we do?", value:4, diff:4}
+];
+
+function dots(n){ let s='<span class="dots" aria-hidden="true">'; for(let i=1;i<=4;i++) s+=`<i class="${i<=n?'on':''}"></i>`; return s+'</span>'; }
+
+function renderLadder(){
+  const el = document.getElementById("ladder");
+  el.innerHTML = LEVELS.map((L,i)=>`<button type="button" class="rung" data-i="${i}" aria-pressed="${i===level}"><span class="num">${i+1}</span><span><span class="t">${L.t}</span><br><span class="q">${L.q}</span></span></button>`).join("");
+  el.querySelectorAll(".rung").forEach(b=>b.addEventListener("click",()=>{level=+b.dataset.i; renderLadder(); renderDetail();}));
+}
+
+function effects(T){
+  const g = T.games, nr = g.filter(x=>x.rivalry==="No");
+  const base = mean(att(nr.filter(x=>x.promotion==="None")));
+  const promo = mean(att(nr.filter(x=>x.promotion!=="None"))) - base;
+  const riv = mean(att(g.filter(x=>x.rivalry==="Yes"))) - mean(att(nr));
+  const ex = mean(att(g.filter(T.extraTest))) - mean(att(g.filter(x=>!T.extraTest(x))));
+  return {base, promo, riv, ex, spread: sd(att(nr)), nrNoPromo: nr.filter(x=>x.promotion==="None").length};
+}
+
+function barChart(T){
+  const g = T.games, n = g.length, W = 600, H = 230, pad = 34, bw = (W-pad-10)/n;
+  const avg = mean(att(g)); const mx = Math.max(...att(g)), mn = Math.min(...att(g));
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Home attendance for each ${T.unit}, average ${fmt(avg)}">`;
+  [0, T.cap/2, T.cap].forEach(v=>{ const y = H-24-(v/T.cap)*(H-40); s+=`<line x1="${pad}" x2="${W}" y1="${y}" y2="${y}" stroke="#E3E6EB"/><text x="${pad-4}" y="${y+4}" font-size="10" text-anchor="end" fill="#6B7280">${v/1000}k</text>`; });
+  g.forEach((x,i)=>{ const h = (x.attendance/T.cap)*(H-40), y = H-24-h; const col = x.attendance===mx?"#15803D":(x.attendance===mn?"#B91C1C":"#2563EB");
+    s+=`<rect class="bar" x="${pad+i*bw+2}" y="${y}" width="${Math.max(2,bw-4)}" height="${h}" rx="2" fill="${col}"><title>${x.date} vs ${x.opponent}: ${fmt(x.attendance)}</title></rect>`; });
+  const ay = H-24-(avg/T.cap)*(H-40);
+  s+=`<line x1="${pad}" x2="${W}" y1="${ay}" y2="${ay}" stroke="#E1141E" stroke-dasharray="5 4" stroke-width="2"/><text x="${W-4}" y="${ay-5}" font-size="12" font-weight="600" text-anchor="end" fill="#A3282B" paint-order="stroke" stroke="#fff" stroke-width="4">average ${fmt(avg)}</text>`;
+  s+=`<text x="${pad}" y="${H-6}" font-size="11" fill="#6B7280">first home ${T.unit}</text><text x="${W}" y="${H-6}" font-size="11" text-anchor="end" fill="#6B7280">last home ${T.unit}</text></svg>`;
+  return s;
+}
+
+function compareBars(rows){
+  // rows: [label, value, count]
+  const mx = Math.max(...rows.map(r=>r[1]));
+  return rows.map(r=>`<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>${r[0]} <span class="note">(${r[2]} ${r[2]===1?'game':'games'})</span></span><b>${fmt(r[1])}</b></div><div style="background:#EEF1F5;border-radius:6px;height:12px"><div class="cbar" style="width:${(r[1]/mx*100).toFixed(1)}%;height:12px;border-radius:6px;background:${r[3]||'#2563EB'}"></div></div></div>`).join("");
+}
+
+function renderDetail(){
+  const T = TEAMS[team], g = T.games, L = LEVELS[level], E = effects(T), el = document.getElementById("detail");
+  const head = `<span class="pill">Level ${level+1}</span><h2 style="margin-top:8px">${L.t}: ${L.q}</h2><div class="meter"><span>Value to the decision ${dots(L.value)}</span><span>Difficulty ${dots(L.diff)}</span></div>`;
+  let body = "";
+  if(level===0){
+    const a = att(g), best = g.find(x=>x.attendance===Math.max(...a)), worst = g.find(x=>x.attendance===Math.min(...a));
+    body = `<p>Descriptive analytics summarizes the past. Here is every home ${T.unit} of ${T.name} last season.</p>
+      <div class="stats"><div class="stat"><div class="k">Season record</div><div class="v" style="font-size:15px">${T.record}</div></div>
+      <div class="stat"><div class="k">Average crowd</div><div class="v">${fmt(mean(a))}</div></div>
+      <div class="stat"><div class="k">Fill rate</div><div class="v">${(mean(a)/T.cap*100).toFixed(1)}%</div></div></div>
+      ${barChart(T)}
+      <p class="note">Green bar: best crowd (${fmt(best.attendance)} vs ${best.opponent}). Red bar: smallest crowd (${fmt(worst.attendance)} vs ${worst.opponent}). Hover or tap a bar for details.</p>
+      <div class="feedback info">Descriptive analytics tells you <b>what</b> happened. It cannot tell you why the smallest crowd was so small. For that, climb to level 2.</div>`;
+  } else if(level===1){
+    const nr = g.filter(x=>x.rivalry==="No");
+    body = `<p>Diagnostic analytics compares groups of games to find out <b>why</b> crowds changed. Average home attendance by game situation:</p>
+      <h3>Promotions (regular games only)</h3>${compareBars([["No promotion",mean(att(nr.filter(x=>x.promotion==="None"))),nr.filter(x=>x.promotion==="None").length],["With a promotion",mean(att(nr.filter(x=>x.promotion!=="None"))),nr.filter(x=>x.promotion!=="None").length,"#15803D"]])}
+      <h3 style="margin-top:12px">Rivalry games</h3>${compareBars([["Regular opponent",mean(att(nr)),nr.length],["Rival",mean(att(g.filter(x=>x.rivalry==="Yes"))),g.filter(x=>x.rivalry==="Yes").length,"#7C3AED"]])}
+      <h3 style="margin-top:12px">${team==="soc"?"Weather (open-air stadium)":"Night of the week"}</h3>${compareBars([[T.extraLabel[0],mean(att(g.filter(x=>!T.extraTest(x)))),g.filter(x=>!T.extraTest(x)).length],[T.extraLabel[1],mean(att(g.filter(T.extraTest))),g.filter(T.extraTest).length,"#B45309"]])}
+      <div class="feedback info">Careful: some groups have only one to four games. A difference based on a few games is a clue, not proof. Diagnostic work always asks "could something else explain this?"</div>`;
+  } else if(level===2){
+    body = `<p>Predictive analytics uses past patterns to estimate the future. This simple model starts from a regular ${T.unit} with no promotion (${fmt(E.base)} fans) and adds the differences found on level 2.</p>
+      <div class="opts" role="group" aria-label="Next game facts">
+        <label><input type="checkbox" id="fRiv"> Rival opponent</label>
+        <label><input type="checkbox" id="fPro"> Promotion planned</label>
+        <label><input type="checkbox" id="fEx"> ${team==="soc"?"Rain in the forecast":"Friday night"}</label>
+      </div>
+      <div class="stat" style="margin:10px 0"><div class="k">Forecast attendance</div><div class="forecast" id="fc"></div><div class="note" id="fr"></div></div>
+      <div id="fbar"></div>
+      <div class="feedback info">A forecast is a best guess with a range, never a promise. With only one season of data, the range is wide. Managers should plan for the low end and hope for the high end.</div>`;
+  } else {
+    const gain = E.promo*E.nrNoPromo, avgPrice = mean(g.map(x=>x.avg_ticket_price));
+    body = `<p>Prescriptive analytics recommends an action and estimates its effect. Based on levels 2 and 3:</p>
+      <div class="card" style="box-shadow:none;background:var(--ok-soft);border-color:#BBE5C8">
+        <h3>Recommendation</h3>
+        <p style="margin:0">Add a promotion to every regular home ${T.unit} that had none last season (${E.nrNoPromo} ${T.unit==="match"?"matches":"games"}). Promotions were linked to about <b>${fmt(E.promo)}</b> more fans per ${T.unit}.</p>
+      </div>
+      <div class="stats"><div class="stat"><div class="k">Extra fans (estimate)</div><div class="v">${fmt(gain)}</div></div>
+      <div class="stat"><div class="k">Extra ticket revenue</div><div class="v">$${fmt(gain*avgPrice)}</div></div>
+      <div class="stat"><div class="k">Average ticket price used</div><div class="v">$${avgPrice.toFixed(2)}</div></div></div>
+      <h3>Check before you decide</h3>
+      <ul><li>What does each promotion cost (giveaways, fireworks, staff)? Revenue is not profit.</li>
+      <li>Were promotions placed on games that would have drawn well anyway?</li>
+      <li>Will fans expect a giveaway every time and stop buying without one?</li>
+      <li>How will we measure the result next season, and what result would change our mind?</li></ul>
+      <div class="feedback info">This is the top of the ladder: an action, an expected effect, and a plan to check it. That is the decision cycle you will use all term.</div>`;
+  }
+  el.innerHTML = head + body;
+  if(level===2){ ["fRiv","fPro","fEx"].forEach(id=>document.getElementById(id).addEventListener("change",updateForecast)); updateForecast(); }
+  if(hasGSAP){ gsap.from(el.querySelectorAll(".bar"),{scaleY:0,transformOrigin:"bottom",duration:.5,stagger:.02}); gsap.from(el.querySelectorAll(".cbar"),{width:0,duration:.6,stagger:.05}); }
+}
+
+function updateForecast(){
+  const T = TEAMS[team], E = effects(T);
+  let f = E.base + (document.getElementById("fRiv").checked?E.riv:0) + (document.getElementById("fPro").checked?E.promo:0) + (document.getElementById("fEx").checked?E.ex:0);
+  f = Math.min(T.cap, f);
+  const lo = Math.max(0, f - E.spread), hi = Math.min(T.cap, f + E.spread);
+  document.getElementById("fc").textContent = fmt(f) + " fans";
+  document.getElementById("fr").textContent = `Likely range: ${fmt(lo)} to ${fmt(hi)}. ${T.venue[0].toUpperCase()+T.venue.slice(1)} capacity: ${fmt(T.cap)}.`;
+  document.getElementById("fbar").innerHTML = `<div style="position:relative;background:#EEF1F5;border-radius:8px;height:22px" aria-hidden="true"><div style="position:absolute;left:${lo/T.cap*100}%;width:${(hi-lo)/T.cap*100}%;top:0;bottom:0;background:#C7D7FE;border-radius:8px"></div><div style="position:absolute;left:calc(${f/T.cap*100}% - 2px);width:4px;top:-3px;bottom:-3px;background:#A3282B;border-radius:2px"></div></div><div class="note" style="display:flex;justify-content:space-between"><span>0</span><span>${fmt(T.cap)}</span></div>`;
+}
+
+const QUESTIONS = [
+  ["How many fans came to our home games last season?",0],
+  ["Why were the two rainy matches less crowded than the rest?",1],
+  ["How many tickets will we sell for the rivalry match next month?",2],
+  ["What price should we charge for Upper Deck seats against Palm Beach United?",3],
+  ["Which Breakers player scored the most points per game this season?",0],
+  ["Did student night cause the bigger crowd, or was it the opponent?",1],
+  ["Which season ticket holders are likely not to renew next year?",2],
+  ["Which sponsors should we renew, and which should we replace?",3]
+];
+let gScore = 0, answered = 0;
+function renderGame(){
+  const box = document.getElementById("qs");
+  box.innerHTML = QUESTIONS.map((q,i)=>`<div class="qcard" data-i="${i}"><div class="qq">${i+1}. ${q[0]}</div><div class="qbtns">${LEVELS.map((L,j)=>`<button type="button" class="btn" data-j="${j}">${L.t}</button>`).join("")}</div><div class="fb note" style="margin-top:6px"></div></div>`).join("");
+  box.querySelectorAll(".qcard").forEach(card=>{
+    const i = +card.dataset.i;
+    card.querySelectorAll(".btn").forEach(b=>b.addEventListener("click",()=>{
+      if(card.dataset.done) return;
+      card.dataset.done = 1; answered++;
+      const j = +b.dataset.j, right = QUESTIONS[i][1];
+      card.querySelectorAll(".btn").forEach(x=>{ x.disabled = true; if(+x.dataset.j===right) x.classList.add("right"); });
+      const why = ["It only counts what already happened.","It looks for the reason behind a result.","It estimates something that has not happened yet.","It asks for an action to take."][right];
+      if(j===right){ gScore++; card.querySelector(".fb").textContent = "Correct. " + LEVELS[right].t + ": " + why; }
+      else { b.classList.add("wrong"); card.querySelector(".fb").textContent = "Not quite. This is " + LEVELS[right].t + ": " + why; }
+      document.getElementById("gScore").textContent = gScore;
+      if(answered===QUESTIONS.length){ const d = document.getElementById("gDone"); d.hidden = false; d.textContent = `You placed ${gScore} of 8 questions correctly. ` + (gScore>=7 ? "Excellent: you can tell the four levels apart." : "Review the ladder above and try the questions you missed again by reloading the page."); }
+    }));
+  });
+}
+
+function setTeam(t){ team = t; document.getElementById("tSoc").setAttribute("aria-pressed", t==="soc"); document.getElementById("tBb").setAttribute("aria-pressed", t==="bb"); renderDetail(); }
+document.getElementById("tSoc").addEventListener("click",()=>setTeam("soc"));
+document.getElementById("tBb").addEventListener("click",()=>setTeam("bb"));
+renderLadder(); renderDetail(); renderGame();
+
+</script>
+</body>
+</html>

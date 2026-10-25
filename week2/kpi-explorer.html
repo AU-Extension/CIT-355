@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KPI Explorer</title>
+<meta name="description" content="CIT 355 Week 2 interactive: on-field and business KPIs for Biscayne Bay FC and the Breakers, with calculators and benchmarks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:#fff;padding:3px;gap:3px;flex-wrap:wrap}
+  .toggle button{font:inherit;font-size:14px;font-weight:600;border:0;background:transparent;padding:7px 16px;border-radius:999px;cursor:pointer;color:var(--ink-2)}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .kgrid{display:grid;gap:16px;grid-template-columns:1fr}
+  @media(min-width:760px){.kgrid{grid-template-columns:1fr 1fr}}
+  .kpi h3{font-size:18px;margin:4px 0 6px}
+  .kpi .tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:999px}
+  .tag.field{background:#E7F6EC;color:#14532D}
+  .tag.biz{background:#EEF4FF;color:#1E3A8A}
+  .kpi p{margin:6px 0;font-size:15px}
+  .formula{font-family:var(--mono);font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px;margin:8px 0;overflow-x:auto}
+  .calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:8px 0}
+  .calc label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+  .calc input{width:100%}
+  .result{font-size:26px;font-weight:700;color:var(--au-red-dark)}
+  .gauge{position:relative;height:12px;border-radius:999px;background:linear-gradient(90deg,#FCA5A5 0 33.3%,#FCD34D 33.3% 66.6%,#86EFAC 66.6% 100%);margin:14px 0 4px}
+  .gauge .pin{position:absolute;top:-5px;width:4px;height:22px;background:var(--ink);border-radius:2px;transform:translateX(-2px);transition:left .4s}
+  .glabels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .verdict{font-weight:600;font-size:14px;margin-top:6px}
+  .why{font-size:14px;color:var(--ink-2)}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 2 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">Week 2 · Explorer</span>
+    <h1>KPI explorer</h1>
+    <p class="lede">A key performance indicator (KPI) is a number a manager watches to know whether things are going well. Explore the on-field and business KPIs of the Biscayne Bay Sports Group, change the inputs, and see how each one is calculated.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol>
+      <li>Choose a team. Every calculator starts with that team's real numbers from last season.</li>
+      <li>Read what each KPI means and why a manager cares about it.</li>
+      <li>Change the numbers in a calculator to see how the KPI responds, for example "what if 1,000 more fans came to every game?"</li>
+      <li>Use the gauge to judge the result against the course benchmark, then press "Reset to season numbers".</li>
+    </ol>
+  </details>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:0 0 16px">
+    <div class="toggle" role="group" aria-label="Choose a team">
+      <button type="button" id="tSoc" aria-pressed="true">Soccer: Biscayne Bay FC</button>
+      <button type="button" id="tBb" aria-pressed="false">Basketball: Breakers</button>
+    </div>
+    <div class="toggle" role="group" aria-label="Filter KPIs">
+      <button type="button" class="flt" data-f="all" aria-pressed="true">All KPIs</button>
+      <button type="button" class="flt" data-f="field" aria-pressed="false">On the field</button>
+      <button type="button" class="flt" data-f="biz" aria-pressed="false">Business</button>
+    </div>
+    <button type="button" class="btn" id="reset">Reset to season numbers</button>
+  </div>
+
+  <div class="kgrid" id="kgrid" aria-live="polite"></div>
+  <p class="note" style="font-size:13px;color:var(--muted);margin-top:14px">Benchmarks are simple course guides for this exercise, not official league standards. Season numbers come from the course data files: soccer_matches.csv, basketball_games.csv, ticket_sales.csv, and fans.csv.</p>
+
+</main>
+
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+const hasGSAP = typeof window.gsap !== 'undefined';
+
+const pct = v => (v*100).toFixed(1)+"%";
+const num = (v,d=0) => Number(v).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const money = v => "$"+Number(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+// lo, hi: values mapped to the left and right of the gauge; cut1/cut2: needs work / okay / strong boundaries
+const K = {
+ soc: [
+  {id:"winpct",tag:"field",name:"Win percentage",def:"The share of matches the team won.",why:"Owners and fans judge the season by it, and it drives ticket demand next year.",formula:"wins ÷ matches played",
+   inputs:[["Wins",14],["Matches played",34]],calc:v=>v[0]/v[1],show:pct,lo:0.2,hi:0.7,cut:[0.35,0.5],labels:["Struggling","Middle of the table","Contender"]},
+  {id:"ppm",tag:"field",name:"Points per match",def:"In soccer a win earns 3 points and a draw 1. Points per match shows the pace of the season.",why:"League position depends on points, not wins alone, so draws count.",formula:"(3 × wins + draws) ÷ matches played",
+   inputs:[["Wins",14],["Draws",7],["Matches played",34]],calc:v=>(3*v[0]+v[1])/v[2],show:v=>v.toFixed(2),lo:0.8,hi:2.2,cut:[1.3,1.7],labels:["Struggling","Middle of the table","Contender"]},
+  {id:"gd",tag:"field",name:"Goal difference",def:"Goals scored minus goals allowed over the season.",why:"It shows whether the team is really better than its opponents, beyond close wins and losses.",formula:"goals scored − goals allowed",
+   inputs:[["Goals scored",53],["Goals allowed",51]],calc:v=>v[0]-v[1],show:v=>(v>0?"+":"")+v,lo:-25,hi:25,cut:[-5,5],labels:["Outplayed","Even","Dominant"]},
+  {id:"xg",tag:"field",name:"Finishing vs chances (expected goals)",def:"Expected goals (xG) estimates how many goals an average player would score from the chances created. Goals minus xG shows finishing luck or skill.",why:"A big gap usually does not last. Teams that score far above their xG tend to cool off, and the reverse.",formula:"goals scored − expected goals",
+   inputs:[["Goals scored",53],["Expected goals (xG)",55.5]],calc:v=>v[0]-v[1],show:v=>(v>0?"+":"")+v.toFixed(1),lo:-12,hi:12,cut:[-4,4],labels:["Wasting chances","As expected","Finishing above chances"]},
+  {id:"fill",tag:"biz",name:"Fill rate",def:"The share of seats filled at an average home match.",why:"Empty seats earn nothing and make the atmosphere flat on TV, which hurts sponsors.",formula:"average home attendance ÷ stadium capacity",
+   inputs:[["Average home attendance",8573.7],["Stadium capacity",12000]],calc:v=>v[0]/v[1],show:pct,lo:0.4,hi:1,cut:[0.7,0.85],labels:["Needs work","Okay","Strong"]},
+  {id:"rev",tag:"biz",name:"Ticket revenue per ticket sold",def:"How much the club earns, on average, from each ticket sold.",why:"It shows whether pricing and seat mix are working, not only how many tickets moved.",formula:"total ticket revenue ÷ tickets sold",
+   inputs:[["Total ticket revenue ($)",5281331],["Tickets sold",143237]],calc:v=>v[0]/v[1],show:money,lo:15,hi:60,cut:[30,40],labels:["Low","Okay","Strong"]},
+  {id:"renew",tag:"biz",name:"Season ticket renewal rate",def:"The share of season ticket holders who bought again for next season. This number covers the whole group.",why:"Season ticket holders are the most reliable revenue. Replacing a lost one costs far more than keeping one.",formula:"holders who renewed ÷ all season ticket holders",
+   inputs:[["Holders who renewed",170],["All season ticket holders",235]],calc:v=>v[0]/v[1],show:pct,lo:0.5,hi:1,cut:[0.75,0.85],labels:["Needs work","Okay","Strong"]},
+  {id:"spend",tag:"biz",name:"Average spend per fan",def:"What a fan in the database spends on merchandise and concessions in a season.",why:"Ticket price is only part of a fan's value. Food and merchandise often decide whether a promotion pays off.",formula:"average merchandise spend + average concessions spend",
+   inputs:[["Average merchandise spend ($)",125.10],["Average concessions spend ($)",170.23]],calc:v=>v[0]+v[1],show:money,lo:100,hi:500,cut:[200,350],labels:["Low","Okay","Strong"]}
+ ],
+ bb: [
+  {id:"winpct",tag:"field",name:"Win percentage",def:"The share of games the team won. Basketball has no draws.",why:"It is the headline number of the season and drives playoff chances and ticket demand.",formula:"wins ÷ games played",
+   inputs:[["Wins",23],["Games played",40]],calc:v=>v[0]/v[1],show:pct,lo:0.2,hi:0.8,cut:[0.45,0.6],labels:["Struggling","Middle of the pack","Contender"]},
+  {id:"pdiff",tag:"field",name:"Point differential per game",def:"Average points scored minus average points allowed.",why:"It predicts future results better than the win-loss record, because close games often come down to luck.",formula:"(points scored − points allowed) ÷ games played",
+   inputs:[["Points scored",4269],["Points allowed",4152],["Games played",40]],calc:v=>(v[0]-v[1])/v[2],show:v=>(v>0?"+":"")+v.toFixed(1),lo:-10,hi:10,cut:[-2,2],labels:["Outplayed","Even","Dominant"]},
+  {id:"ppg",tag:"field",name:"Points per game",def:"How many points the team scores in an average game.",why:"It measures the offense and helps marketing too: high-scoring games are more fun to watch.",formula:"points scored ÷ games played",
+   inputs:[["Points scored",4269],["Games played",40]],calc:v=>v[0]/v[1],show:v=>v.toFixed(1),lo:90,hi:125,cut:[102,112],labels:["Low scoring","Average","High scoring"]},
+  {id:"fg",tag:"field",name:"Field goal percentage",def:"The share of shots that go in. The data file gives a percentage for each game; across the season the Breakers averaged 46.1%. The calculator uses an example of 461 makes in 1,000 shots.",why:"Better shot quality and shooting win games. A low number can point to poor shot selection.",formula:"shots made ÷ shots attempted (season average 46.1%)",
+   inputs:[["Shots made (example)",461],["Shots attempted (example)",1000]],calc:v=>v[0]/v[1],show:pct,lo:0.38,hi:0.54,cut:[0.44,0.48],labels:["Cold","Average","Efficient"]},
+  {id:"fill",tag:"biz",name:"Fill rate",def:"The share of seats filled at an average home game.",why:"Empty seats earn nothing and make the arena feel flat on TV and social media.",formula:"average home attendance ÷ arena capacity",
+   inputs:[["Average home attendance",4922],["Arena capacity",6000]],calc:v=>v[0]/v[1],show:pct,lo:0.4,hi:1,cut:[0.7,0.85],labels:["Needs work","Okay","Strong"]},
+  {id:"rev",tag:"biz",name:"Ticket revenue per ticket sold",def:"How much the team earns, on average, from each ticket sold.",why:"Courtside seats and student tickets pull the average in opposite directions, so the mix matters.",formula:"total ticket revenue ÷ tickets sold",
+   inputs:[["Total ticket revenue ($)",3999511],["Tickets sold",91720]],calc:v=>v[0]/v[1],show:money,lo:15,hi:60,cut:[30,40],labels:["Low","Okay","Strong"]},
+  {id:"renew",tag:"biz",name:"Season ticket renewal rate",def:"The share of season ticket holders who bought again for next season. This number covers the whole group.",why:"Season ticket holders are the most reliable revenue. Replacing a lost one costs far more than keeping one.",formula:"holders who renewed ÷ all season ticket holders",
+   inputs:[["Holders who renewed",170],["All season ticket holders",235]],calc:v=>v[0]/v[1],show:pct,lo:0.5,hi:1,cut:[0.75,0.85],labels:["Needs work","Okay","Strong"]},
+  {id:"spend",tag:"biz",name:"Average spend per fan",def:"What a fan in the database spends on merchandise and concessions in a season.",why:"Ticket price is only part of a fan's value. Food and merchandise often decide whether a promotion pays off.",formula:"average merchandise spend + average concessions spend",
+   inputs:[["Average merchandise spend ($)",125.10],["Average concessions spend ($)",170.23]],calc:v=>v[0]+v[1],show:money,lo:100,hi:500,cut:[200,350],labels:["Low","Okay","Strong"]}
+ ]
+};
+let team = "soc", filter = "all";
+
+function card(k){
+  return `<article class="card kpi" data-id="${k.id}"><span class="tag ${k.tag}">${k.tag==="field"?"On the field":"Business"}</span>
+    <h3>${k.name}</h3><p>${k.def}</p><p class="why"><b>Why a manager cares:</b> ${k.why}</p>
+    <div class="formula">${k.formula}</div>
+    <div class="calc">${k.inputs.map((inp,j)=>`<label>${inp[0]}<input type="number" step="any" data-j="${j}" value="${inp[1]}"></label>`).join("")}</div>
+    <div class="result" aria-live="polite"></div>
+    <div class="gauge" aria-hidden="true"><div class="pin"></div></div>
+    <div class="glabels"><span>${k.labels[0]}</span><span>${k.labels[1]}</span><span>${k.labels[2]}</span></div>
+    <div class="verdict"></div></article>`;
+}
+function update(el,k){
+  const v = [...el.querySelectorAll("input")].map(i=>parseFloat(i.value));
+  const res = el.querySelector(".result"), verdict = el.querySelector(".verdict"), pin = el.querySelector(".pin");
+  if(v.some(x=>isNaN(x)) || k.calc(v)===Infinity || isNaN(k.calc(v))){ res.textContent = "Enter numbers in every box"; verdict.textContent = ""; return; }
+  const r = k.calc(v);
+  res.textContent = k.show(r);
+  // place pin: thirds of the gauge correspond to [lo,cut1], [cut1,cut2], [cut2,hi]
+  let pos;
+  if(r<=k.cut[0]) pos = Math.max(0,(r-k.lo)/(k.cut[0]-k.lo))/3;
+  else if(r<=k.cut[1]) pos = 1/3 + (r-k.cut[0])/(k.cut[1]-k.cut[0])/3;
+  else pos = 2/3 + Math.min(1,(r-k.cut[1])/(k.hi-k.cut[1]))/3;
+  pin.style.left = (Math.max(0,Math.min(1,pos))*100)+"%";
+  const band = r<=k.cut[0]?0:(r<=k.cut[1]?1:2);
+  verdict.textContent = "Course benchmark: " + k.labels[band];
+  verdict.style.color = ["#B91C1C","#92400E","#15803D"][band];
+}
+function render(){
+  const grid = document.getElementById("kgrid");
+  const list = K[team].filter(k=>filter==="all"||k.tag===filter);
+  grid.innerHTML = list.map(card).join("");
+  grid.querySelectorAll(".kpi").forEach(el=>{
+    const k = K[team].find(x=>x.id===el.dataset.id);
+    el.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>update(el,k)));
+    update(el,k);
+  });
+  if(hasGSAP) gsap.from(grid.querySelectorAll(".kpi"),{opacity:0,y:10,duration:.35,stagger:.04});
+}
+function setTeam(t){ team=t; document.getElementById("tSoc").setAttribute("aria-pressed",t==="soc"); document.getElementById("tBb").setAttribute("aria-pressed",t==="bb"); render(); }
+document.getElementById("tSoc").addEventListener("click",()=>setTeam("soc"));
+document.getElementById("tBb").addEventListener("click",()=>setTeam("bb"));
+document.querySelectorAll(".flt").forEach(b=>b.addEventListener("click",()=>{ filter=b.dataset.f; document.querySelectorAll(".flt").forEach(x=>x.setAttribute("aria-pressed",x===b)); render(); }));
+document.getElementById("reset").addEventListener("click",render);
+render();
+
+</script>
+</body>
+</html>

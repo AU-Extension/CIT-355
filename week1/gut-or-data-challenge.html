@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gut or Data Challenge</title>
+<meta name="description" content="CIT 355 Week 1 challenge: make ten front office decisions, first with your gut and then with Biscayne Bay data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .progress{height:8px;background:#EEF1F5;border-radius:999px;overflow:hidden;margin:6px 0 14px}
+  .progress div{height:100%;background:var(--au-red);width:0;transition:width .3s}
+  .sport{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px}
+  .sport.soc{background:#E7F6EC;color:#14532D}
+  .sport.bb{background:#FEF4E6;color:#7C2D12}
+  .stage{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 6px}
+  .choice{display:block;width:100%;text-align:left;font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 14px;margin:6px 0;cursor:pointer}
+  .choice:hover{border-color:#C9CED6}
+  .choice[disabled]{cursor:default}
+  .choice.picked{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .choice.right{background:var(--ok-soft);border-color:#9AD3AE}
+  .choice.wrong{background:var(--bad-soft);border-color:#F0A8A8}
+  .datacard{background:#0F1722;color:#E6EDF7;border-radius:12px;padding:16px;margin-top:8px}
+  .datacard h3{color:#fff;margin:0 0 8px;font-size:15px}
+  .datacard table{width:100%;border-collapse:collapse;font-size:14px}
+  .datacard td,.datacard th{padding:6px 8px;border-bottom:1px solid #263244;text-align:left}
+  .datacard th{color:#9FB0C8;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  .datacard .src{font-size:12px;color:#9FB0C8;margin-top:8px}
+  .exp{border-left:4px solid var(--au-red);background:var(--au-red-soft);padding:10px 14px;border-radius:6px;margin-top:10px;font-size:15px}
+  .tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+  .tally div{background:var(--bg);border-radius:10px;padding:10px 12px}
+  .tally b{display:block;font-size:24px}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 1 · Interactive B</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">Week 1 · Challenge</span>
+    <h1>Gut or data?</h1>
+    <p class="lede">Ten real decisions from the Biscayne Bay Sports Group front office. Make a quick gut call, look at the data, then make your final decision. You score points for the decision the data supports, and you will see when experience still matters.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this challenge</summary>
+    <ol>
+      <li>Read the situation and make your gut call. It does not count toward your score.</li>
+      <li>Read the data card that appears. All numbers come from last season.</li>
+      <li>Make your final decision. It is worth 10 points if it matches what the data supports.</li>
+      <li>Read the explanation and the note on what data cannot see, then go to the next decision.</li>
+    </ol>
+  </details>
+
+  <section class="card" aria-live="polite">
+    <div class="score"><span>Decision</span><span class="big" id="num">1</span><span>of 10</span><span style="margin-left:auto">Score</span><span class="big" id="score">0</span><span>/ 100</span></div>
+    <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+    <div id="stage"></div>
+  </section>
+
+</main>
+
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+const hasGSAP = typeof window.gsap !== 'undefined';
+
+const D = [
+ {sport:"soc", title:"Moving the midweek match",
+  sit:"Biscayne Bay FC played one home match on a Wednesday last season and drew 6,990 fans. Operations wants to move next season's midweek match to a weekend.",
+  opts:["Keep it on Wednesday. Loyal fans come any night.","Move it to a Friday or Saturday."],
+  card:`<h3>Average home attendance by day</h3><table><tr><th>Day</th><th>Matches</th><th>Average crowd</th></tr><tr><td>Friday</td><td>4</td><td>9,010</td></tr><tr><td>Saturday</td><td>10</td><td>8,676</td></tr><tr><td>Sunday</td><td>3</td><td>8,178</td></tr><tr><td>Wednesday</td><td>1</td><td>6,990</td></tr></table>`,
+  ans:1, why:"Weekend matches averaged 1,700 to 2,000 more fans than the Wednesday match.", exp:"Only one Wednesday match was played, so the evidence is thin. The league schedule, TV slots, and stadium availability may not allow the move."},
+ {sport:"soc", title:"A fan giveaway for a regular match",
+  sit:"The next regular (non-rivalry) home match has no promotion. Marketing can spend $15,000 on a fan giveaway.",
+  opts:["Skip it. The crowd will be the same either way.","Run the giveaway."],
+  card:`<h3>Regular home matches last season</h3><table><tr><th>Situation</th><th>Matches</th><th>Average crowd</th></tr><tr><td>No promotion</td><td>7</td><td>7,954</td></tr><tr><td>With a promotion</td><td>9</td><td>8,713</td></tr></table><div class="src">Average ticket price last season: $38.39</div>`,
+  ans:1, why:"Promotions were linked to about 759 more fans per match. At $38.39 a ticket, that is about $29,000 in ticket revenue, more than the $15,000 cost, before counting food and merchandise.", exp:"Data cannot tell you which giveaway fans actually want. Your marketing team's knowledge of the fan base matters here."},
+ {sport:"soc", title:"Rain in the forecast",
+  sit:"Rain is forecast for Saturday's home match, and ticket sales are slow. The stadium is open air.",
+  opts:["Do nothing. Rain does not matter in Miami.","Promote a rain-ready offer, such as free ponchos or covered-seat upgrades.","Cancel the planned promotion to save money."],
+  card:`<h3>Home attendance by weather</h3><table><tr><th>Weather</th><th>Matches</th><th>Average crowd</th></tr><tr><td>Dry</td><td>16</td><td>8,677</td></tr><tr><td>Rain</td><td>2</td><td>7,750</td></tr></table>`,
+  ans:1, why:"Rainy matches drew about 900 fewer fans. Acting before match day gives you a chance to protect the crowd.", exp:"Two rainy matches are a small sample. Staff experience with lightning delays and covered seating is just as important."},
+ {sport:"soc", title:"Re-signing a veteran forward",
+  sit:"Forward Josué Robinson is 31, scored 13 goals, and his contract ends this year. Some say he is too old to keep.",
+  opts:["Let him go. He is 31.","Offer a short one- or two-year deal.","Offer a five-year deal at triple his salary."],
+  card:`<h3>Josué Robinson, forward</h3><table><tr><th>Measure</th><th>Value</th></tr><tr><td>Age</td><td>31</td></tr><tr><td>Minutes played</td><td>2,449</td></tr><tr><td>Goals</td><td>13</td></tr><tr><td>Expected goals (quality of his chances)</td><td>11.88</td></tr><tr><td>Annual salary</td><td>$85,000</td></tr></table><div class="src">Expected goals estimates how many goals an average player would score from the same chances.</div>`,
+  ans:1, why:"His goals match the quality of his chances, so his scoring was not luck, and his salary is low. A short deal keeps a productive player without long-term risk as he ages.", exp:"Medical tests, fitness, and his role in the dressing room are things the data card does not show."},
+ {sport:"soc", title:"Striker or defense?",
+  sit:"The owner wants to spend the transfer budget on a new striker. Your analyst says the real problem is at the other end of the field.",
+  opts:["Buy the striker.","Review the goalkeeper and defense first."],
+  card:`<h3>Season totals, 34 matches</h3><table><tr><th></th><th>Actual</th><th>Expected</th></tr><tr><td>Goals scored</td><td>53</td><td>55.5</td></tr><tr><td>Goals allowed</td><td>51</td><td>41.7</td></tr></table>`,
+  ans:1, why:"The team scored about what its chances deserved, but allowed about 9 more goals than expected from the chances opponents had. That points to goalkeeping or defending, not scoring.", exp:"Scouts and coaches need to watch the goals allowed to see why they happened. Numbers point to where to look, they do not replace looking."},
+ {sport:"bb", title:"Keeping student night",
+  sit:"Student night sells deeply discounted tickets. Finance wants to drop it.",
+  opts:["Drop it. Discounts lose money.","Keep it on slower nights."],
+  card:`<h3>Breakers home crowds</h3><table><tr><th>Situation</th><th>Games</th><th>Average crowd</th></tr><tr><td>Regular game, no promotion</td><td>10</td><td>4,547</td></tr><tr><td>Student night</td><td>3</td><td>5,325</td></tr></table><div class="src">Arena capacity: 6,000</div>`,
+  ans:1, why:"Student nights drew about 800 more fans than regular games with no promotion. Empty seats earn nothing, and extra fans also buy food and merchandise.", exp:"Students today are season ticket buyers tomorrow. That long-term value is real but does not show up in one season's numbers."},
+ {sport:"bb", title:"Blaming the three-point shot",
+  sit:"After a loss, an assistant coach says poor three-point shooting is why the Breakers lose games.",
+  opts:["Agree, and spend practice time on three-point shooting.","Check the numbers first. They point somewhere else."],
+  card:`<h3>Averages in wins and losses</h3><table><tr><th></th><th>Wins (23)</th><th>Losses (17)</th></tr><tr><td>Three-point %</td><td>35.2%</td><td>35.9%</td></tr><tr><td>Rebounds per game</td><td>44.9</td><td>42.5</td></tr></table>`,
+  ans:1, why:"Three-point shooting was almost the same in wins and losses. In wins the Breakers averaged 2.4 more rebounds than in losses, which is a better lead to follow.", exp:"Coaches see matchups, effort, and defense that box scores miss. Use the data to start the conversation, not to end it."},
+ {sport:"bb", title:"Pricing rivalry games",
+  sit:"Rivalry games against Orlando and Fort Myers draw bigger crowds. Sales wants to raise prices for them next season.",
+  opts:["Raise rivalry prices by $10.","Raise them a little, $2 to $3, and watch sales.","Cut rivalry prices to fill the arena."],
+  card:`<h3>Rivalry vs regular home games</h3><table><tr><th></th><th>Games</th><th>Average crowd</th><th>Average price</th></tr><tr><td>Rivalry</td><td>4</td><td>5,351</td><td>$32.25</td></tr><tr><td>Regular</td><td>16</td><td>4,815</td><td>$28.69</td></tr></table><div class="src">No rivalry game sold out the 6,000-seat arena.</div>`,
+  ans:1, why:"Fans already paid more for rivalry games and still came in bigger numbers, so a small increase is reasonable. The arena did not sell out, so a big jump could push fans away.", exp:"Fan goodwill and how prices compare with other events in Miami matter too."},
+ {sport:"bb", title:"Rescuing a slow Saturday",
+  sit:"The Charlotte game last November drew only 3,971 fans, the smallest crowd of the season. For the next slow Saturday, you can choose one tool.",
+  opts:["Discount every seat by 20%.","Offer a family pack."],
+  card:`<h3>Family pack games</h3><table><tr><th>Game</th><th>Crowd</th></tr><tr><td>Orlando (rival)</td><td>5,387</td></tr><tr><td>Charlotte</td><td>5,333</td></tr><tr><td>Birmingham</td><td>6,000 (the only sellout)</td></tr></table><div class="src">Regular games with no promotion averaged 4,547.</div>`,
+  ans:1, why:"Family pack games averaged 5,573 fans and produced the season's only sellout. A targeted offer brings new groups without cutting the price for fans who would pay full price anyway.", exp:"Discounting every seat can train fans to wait for deals. Experience with the local market helps choose the right offer."},
+ {sport:"bb", title:"Extra hotel nights on the road",
+  sit:"The coach asks for $40,000 for extra hotel nights before road games, saying the team cannot win away from home.",
+  opts:["Approve it right away.","Ask for more evidence first."],
+  card:`<h3>Breakers record</h3><table><tr><th></th><th>Games</th><th>Wins</th><th>Win %</th></tr><tr><td>Home</td><td>20</td><td>12</td><td>60%</td></tr><tr><td>Away</td><td>20</td><td>11</td><td>55%</td></tr></table>`,
+  ans:1, why:"The team won 55% of road games, only slightly less than at home. The data does not show a big road problem worth $40,000.", exp:"Travel fatigue and sleep data from the medical staff could change this answer. Ask for that evidence before deciding."}
+];
+let i = 0, score = 0, gutRight = 0, changed = 0, finalRight = 0;
+const stage = document.getElementById("stage");
+
+function shuffle(a){ for(let j=a.length-1;j>0;j--){ const r=Math.floor(Math.random()*(j+1)); [a[j],a[r]]=[a[r],a[j]]; } return a; }
+function render(){
+  const d = D[i]; const order = shuffle([...d.opts.keys()]);
+  document.getElementById("num").textContent = i+1;
+  document.getElementById("bar").style.width = (i/D.length*100)+"%";
+  stage.innerHTML = `<span class="sport ${d.sport}">${d.sport==="soc"?"Soccer · Biscayne Bay FC":"Basketball · Breakers"}</span>
+    <h2 style="margin-top:10px">${d.title}</h2><p>${d.sit}</p>
+    <div class="stage">Step 1 · Your gut call</div><div id="gut">${order.map(k=>`<button type="button" class="choice" data-k="${k}">${d.opts[k]}</button>`).join("")}</div>
+    <div id="dataPart" hidden><div class="stage">Step 2 · The data</div><div class="datacard">${d.card}</div>
+    <div class="stage">Step 3 · Your final decision</div><div id="fin">${order.map(k=>`<button type="button" class="choice" data-k="${k}">${d.opts[k]}</button>`).join("")}</div></div>
+    <div id="result"></div>`;
+  let gut = null;
+  stage.querySelectorAll("#gut .choice").forEach(b=>b.addEventListener("click",()=>{
+    if(gut!==null) return; gut = +b.dataset.k; b.classList.add("picked");
+    stage.querySelectorAll("#gut .choice").forEach(x=>x.disabled = true);
+    const dp = document.getElementById("dataPart"); dp.hidden = false;
+    if(hasGSAP) gsap.from(dp,{opacity:0,y:12,duration:.4});
+    dp.querySelector(".choice").focus();
+    stage.querySelectorAll("#fin .choice").forEach(x=>x.addEventListener("click",()=>finalPick(gut, +x.dataset.k)));
+  }));
+}
+
+function finalPick(gut, k){
+  const d = D[i]; const fin = stage.querySelectorAll("#fin .choice");
+  if(fin[0].disabled) return;
+  fin.forEach(x=>{ const j=+x.dataset.k; x.disabled = true; if(j===d.ans) x.classList.add("right"); if(j===k && k!==d.ans) x.classList.add("wrong"); });
+  if(gut===d.ans) gutRight++;
+  if(gut!==k) changed++;
+  const ok = k===d.ans; if(ok){ score += 10; finalRight++; }
+  document.getElementById("score").textContent = score;
+  const note = ok ? (gut!==d.ans ? "Good call. The data changed your mind, and that is exactly the point." : "Correct, and your gut agreed with the data this time.") : "The data supports a different choice.";
+  document.getElementById("result").innerHTML = `<div class="feedback ${ok?'ok':'bad'}"><b>${ok?'+10 points.':'No points.'}</b> ${note} ${d.why}</div>
+    <div class="exp"><b>What the data cannot see:</b> ${d.exp}</div>
+    <div style="margin-top:14px"><button type="button" class="btn primary" id="next">${i===D.length-1?'See my results':'Next decision'}</button></div>`;
+  document.getElementById("next").addEventListener("click",()=>{ i++; if(i<D.length){ render(); window.scrollTo({top:stage.getBoundingClientRect().top+window.scrollY-90,behavior:"smooth"}); } else finish(); });
+  document.getElementById("next").focus();
+}
+
+function finish(){
+  document.getElementById("bar").style.width = "100%";
+  document.getElementById("num").textContent = 10;
+  const msg = score>=90 ? "Outstanding. You read the evidence like a front office analyst." : score>=70 ? "Solid work. Review the decisions you missed and read their explanations again." : "Keep practicing. Go back over each data card and ask what it really shows.";
+  stage.innerHTML = `<h2>Your results</h2><div class="tally"><div><b>${score}/100</b>Final score</div><div><b>${gutRight}/10</b>Gut calls that matched the data</div><div><b>${changed}</b>Times the data changed your mind</div></div>
+    <div class="feedback ${score>=70?'ok':'info'}">${msg}</div>
+    <p>Gut feeling is fast and often useful, but it is shaped by memorable games and personal bias. Data is slower but checks those instincts. The best front offices use both: data to test the idea, experience to see what the numbers miss.</p>
+    <button type="button" class="btn" id="again">Try again</button>`;
+  document.getElementById("again").addEventListener("click",()=>{ i=0; score=0; gutRight=0; changed=0; finalRight=0; document.getElementById("score").textContent=0; render(); });
+}
+render();
+
+</script>
+</body>
+</html>

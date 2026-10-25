@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dirty Data Challenge</title>
+<meta name="description" content="CIT 355 Week 2 challenge: find and fix the errors hidden in the raw Biscayne Bay match and game data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .toggle{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:18px;background:#fff;padding:3px;gap:3px;max-width:100%}
+  .toggle button{font:inherit;font-size:14px;font-weight:600;border:0;background:transparent;padding:7px 16px;border-radius:999px;cursor:pointer;color:var(--ink-2)}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .grid > *{min-width:0}
+  @media(min-width:900px){.grid.two{grid-template-columns:minmax(0,1fr) 340px}}
+  .tablewrap{overflow:auto;max-height:560px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  table.sheet{border-collapse:collapse;font-family:var(--mono);font-size:13px;min-width:820px;width:100%}
+  table.sheet th{position:sticky;top:0;background:#F1F3F6;font-weight:600;color:var(--ink-2);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);z-index:1}
+  table.sheet th.rn,table.sheet td.rn{background:#F1F3F6;color:var(--muted);text-align:center;width:40px;position:sticky;left:0}
+  table.sheet td{padding:0;border-bottom:1px solid #EEF0F3;border-right:1px solid #EEF0F3;white-space:pre}
+  table.sheet td button{all:unset;display:block;box-sizing:border-box;width:100%;min-height:28px;padding:5px 8px;cursor:pointer}
+  table.sheet td button:focus-visible{outline:3px solid #93C5FD;outline-offset:-3px}
+  table.sheet td.num button{text-align:right}
+  table.sheet td button:hover{background:#FFF7E6}
+  table.sheet td.found button{background:#DCFCE7}
+  table.sheet td.partial button{background:#FEF3C7}
+  table.sheet td.miss button{background:#FEE2E2;box-shadow:inset 0 0 0 2px #EF4444}
+  table.sheet td.fp button{background:#F3F4F6;text-decoration:line-through}
+  .panel{position:sticky;top:12px}
+  .opt{display:block;width:100%;text-align:left;font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;margin:5px 0;cursor:pointer}
+  .opt[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+  .cellinfo{font-family:var(--mono);background:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px;margin:8px 0;white-space:pre-wrap;word-break:break-word}
+  .log li{font-size:14px;margin-bottom:6px}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:8px 0}
+  .legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px;background:var(--c)}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 2 · Interactive B</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">Week 2 · Challenge</span>
+    <h1>Dirty data challenge</h1>
+    <p class="lede">Real data is messy. This is the raw season file exactly as it came out of the old system, with errors hidden in it. Find each problem, name it, and choose the right fix before anyone builds a report on bad numbers.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this challenge</summary>
+    <ol>
+      <li>Choose the soccer or basketball file. Each file has its own hidden errors and its own score.</li>
+      <li>Click any cell that looks wrong. In a spreadsheet, numbers line up on the right and text lines up on the left, which is a useful clue. Away games have no attendance or ticket price on purpose: the club only records crowds at home.</li>
+      <li>In the panel, choose what kind of problem it is, then choose the best fix, and press "Log this problem".</li>
+      <li>Logging a cell that is actually fine costs 2 points. Press "I'm done" to see your score and any errors you missed.</li>
+    </ol>
+  </details>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:0 0 12px">
+    <div class="toggle" role="group" aria-label="Choose a file">
+      <button type="button" id="tSoc" aria-pressed="true">soccer_matches_raw.csv</button>
+      <button type="button" id="tBb" aria-pressed="false">basketball_games_raw.csv</button>
+    </div>
+    <div class="score"><span>Score</span><span class="big" id="score">0</span><span>/ 100</span><span class="pill" id="found">0 logged</span></div>
+  </div>
+
+  <div class="grid two">
+    <section class="card" style="padding:12px">
+      <div class="tablewrap" id="wrap"></div>
+      <div class="legend"><span style="--c:#DCFCE7">Found and fixed correctly</span><span style="--c:#FEF3C7">Found, but the type or fix was off</span><span style="--c:#FEE2E2">Missed (shown after you finish)</span><span style="--c:#E5E7EB">Logged, but nothing was wrong</span></div>
+    </section>
+    <aside class="card panel" aria-live="polite">
+      <div id="panel"><h2>Pick a cell</h2><p>Click a cell in the table to inspect it.</p></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+      <h3>Your cleaning log</h3>
+      <ol class="log" id="log"></ol>
+      <button type="button" class="btn primary" id="done">I'm done</button>
+      <div id="summary"></div>
+    </aside>
+  </div>
+
+</main>
+
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+const hasGSAP = typeof window.gsap !== 'undefined';
+
+const RAW = {"soc": {"cols": ["match_id", "date", "opponent", "home_away", "result", "goals_for", "goals_against", "possession_pct", "attendance", "avg_ticket_price"], "rows": [["S01", "2026-03-07", "Orlando Pines SC", "Home", "L", "0", "2", "57", "9631", "50"], ["S02", "2026-03-18", "Tampa Harbor FC", "Away", "W", "2", "1", "47", "", ""], ["S03", "2026-03-21", "Atlanta Forge", "Home", "W", "3", "1", "54", "9368", "42"], ["S04", "2026-03-29", "charlotte crowns ", "Away", "W", "1", "0", "54", "", ""], ["S05", "2026-04-04", "Nashville Rhythm", "Home", "W", "3", "0", "57", "9509", "42"], ["S06", "04/15/2026", "Austin Hills FC", "Away", "L", "1", "5", "49", "", ""], ["S07", "2026-04-19", "Houston Bayou SC", "Home", "L", "2", "3", "64", "8402", "35"], ["S08", "2026-04-26", "Raleigh Oaks", "Away", "L", "0", "1", "51", "", ""], ["S09", "2026-05-02", "Jacksonville Surf", "Home", "W", "2", "1", "49", "", "35"], ["S10", "2026-05-08", "Savannah Port FC", "Away", "W", "2", "1", "48", "", ""], ["S10", "2026-05-08", "Savannah Port FC", "Away", "W", "2", "1", "48", "", ""], ["S11", "2026-05-15", "Memphis Blues SC", "Home", "W", "6", "0", "49", "9003", "35"], ["S12", "2026-05-23", "Louisville City Lights", "Away", "L", "1", "3", "40", "", ""], ["S13", "2026-05-30", "Birmingham Iron", "Home", "D", "2", "2", "152", "8302", "42"], ["S14", "2026-06-10", "New Orleans Krewe", "Away", "D", "3", "3", "62", "", ""], ["S15", "2026-06-13", "Richmond Rebels", "Home", "W", "1", "0", "61", "9058", "32"], ["S16", "2026-06-20", "Palm Beach United", "Away", "L", "0", "3", "50", "", ""], ["S17", "2026-06-27", "Sarasota Keys FC", "Home", "W", "3", "1", "52", "6984", "42"], ["S18", "2026-07-03", "Orlando Pines SC", "Home", "W", "4", "2", "54", "10599", "46"], ["S19", "2026-07-11", "Tampa Harbor FC", "Away", "L", "0", "1", "47", "", ""], ["S20", "2026-07-19", "Atlanta Forge", "Home", "L", "0", "3", "52", "8237", "32"], ["S21", "2026-07-25", "Charlotte Crowns", "Away", "W", "2", "1", "56", "", ""], ["S22", "2026-07-31", "Nashville Rhythm", "Home", "W", "1", "0", "52", "8839", "42"], ["S23", "2026-08-12", "Austin Hills FC", "Away", "L", "0", "1", "51", "", ""], ["S24", "2026-08-15", "Houston Bayou SC", "Home", "W", "4", "0", "57", "7542", "38"], ["S25", "2026-08-22", "Raleigh Oaks", "home", "D", "3", "3", "54", "", ""], ["S26", "2026-08-29", "Jacksonville Surf", "Home", "D", "1", "1", "62", "7958", "32"], ["S27", "2026-09-05", "Savannah Port FC", "Away", "D", "1", "1", "55", "", ""], ["S28", "2026-09-16", "Memphis Blues SC", "Home", "L", "2", "3", "55", "6990", "38"], ["S29", "2026-09-19", "Louisville City Lights", "Away", "L", "0", "2", "43", "", ""], ["S30", "2026-09-26", "Birmingham Iron", "Home", "D", "0", "0", "61", "9411", "32"], ["S31", "2026-10-07", "New Orleans Krewe", "Away", "L", "-1", "1", "45", "", ""], ["S32", "2026-10-11", "Richmond Rebels", "Home", "W", "2", "1", "55", "7894", "38"], ["S33", "2026-10-17", "Palm Beach United", "Away", "L", "0", "3", "44", "", ""], ["S34", "2026-10-23", "Sarasota Keys FC", "Home", "D", "1", "1", "55", "7599", "38"]]}, "bb": {"cols": ["game_id", "date", "opponent", "home_away", "result", "points_for", "points_against", "fg_pct", "attendance", "avg_ticket_price"], "rows": [["B01", "2026-11-07", "Orlando Comets", "Home", "W", "105", "73", "43.2", "5387", "36"], ["B02", "2026-11-09", "Tampa Tide", "Away", "L", "99", "111", "45.0", "", ""], ["B03", "2026-11-13", "JACKSONVILLE JETS", "Home", "W", "119", "114", "45.0", "4988", "27"], ["B04", "2026-11-17", "Atlanta Peaches", "Away", "L", "112", "118", "47.7", "", ""], ["B05", "2026-11-21", "Charlotte Hornet Hall", "Home", "L", "96", "102", "50.2", "3971", "27"], ["B06", "2026-11-23", "Savannah Swamp Cats", "Away", "W", "110", "96", "44.7", "", ""], ["B06", "2026-11-23", "Savannah Swamp Cats", "Away", "W", "110", "96", "44.7", "", ""], ["B07", "2026-11-28", "Birmingham Steel", "Home", "W", "117", "107", "42.2", "4376", "30"], ["B08", "30-Nov-2026", "New Orleans Brass", "Away", "L", "108", "119", "42.5", "", ""], ["B09", "2026-12-05", "Memphis Kings", "Home", "W", "114", "101", "46.4", "4374", "30"], ["B10", "2026-12-07", "Fort Myers Waves", "Away", "W", "117", "99", "44.1", "", ""], ["B11", "2026-12-12", "Orlando Comets", "Home", "W", "106", "96", "45.3", "", "30"], ["B12", "2026-12-15", "Tampa Tide", "Away", "L", "89", "108", "45.1", "", ""], ["B13", "2026-12-19", "Jacksonville Jets", "Home", "W", "107", "102", "50.9", "4833", "27"], ["B14", "2026-12-22", "Atlanta Peaches", "Away", "L", "90", "101", "50.2", "", ""], ["B15", "2026-12-26", "Charlotte Hornet Hall", "Home", "W", "115", "93", "146.0", "5333", "27"], ["B16", "2026-12-29", "Savannah Swamp Cats", "Away", "W", "107", "94", "39.4", "", ""], ["B17", "2027-01-02", "Birmingham Steel", "Home", "L", "96", "109", "47.6", "4886", "30"], ["B18", "2027-01-04", "New Orleans Brass", "Away", "L", "108", "109", "46.5", "", ""], ["B19", "2027-01-09", "Memphis Kings", "Home", "L", "104", "105", "48.4", "4580 ", "27"], ["B20", "2027-01-11", "Fort Myers Waves", "Away", "L", "93", "111", "44.2", "", ""], ["B21", "2027-01-16", "Orlando Comets", "Home", "L", "111", "118", "47.0", "5433", "33"], ["B22", "2027-01-19", "Tampa Tide", "Away", "W", "115", "110", "43.5", "", ""], ["B23", "2027-01-22", "Jacksonville Jets", "Home", "L", "99", "126", "49.1", "5925", "thirty"], ["B24", "2027-01-25", "Atlanta Peaches", "Away", "W", "112", "108", "42.8", "", ""], ["B25", "2027-01-29", "Charlotte Hornet Hall", "Home", "L", "103", "108", "46.1", "4808", "34"], ["B26", "2027-02-02", "Savannah Swamp Cats", "Away", "L", "96", "104", "50.0", "", ""], ["B27", "2027-02-05", "Birmingham Steel", "Home", "win", "114", "120", "42.9", "4616", "30"], ["B28", "2027-02-08", "New Orleans Brass", "Away", "L", "95", "107", "48.7", "", ""], ["B29", "2027-02-13", "Memphis Kings", "Home", "W", "125", "105", "48.7", "4298", "27"], ["B30", "2027-02-16", "Fort Myers Waves", "Away", "W", "121", "99", "47.4", "", ""], ["B31", "2027-02-20", "Orlando Comets", "Home", "W", "113", "107", "43.6", "5211", "30"], ["B32", "2027-02-23", "Tampa Tide", "Away", "W", "120", "113", "44.2", "", ""], ["B33", "2027-02-27", "Jacksonville Jets", "Home", "W", "", "96", "45.2", "4092", "34"], ["B34", "2027-03-02", "Atlanta Peaches", "Away", "W", "88", "84", "46.3", "", ""], ["B35", "2027-03-05", "Charlotte Hornet Hall", "Home", "W", "117", "91", "48.1", "5033", "27"], ["B36", "2027-03-08", "Savannah Swamp Cats", "Away", "W", "112", "91", "51.2", "", ""], ["B37", "2027-03-13", "Birmingham Steel", "Home", "W", "107", "100", "44.9", "6000", "24"], ["B38", "2027-03-15", "New Orleans Brass", "Away", "W", "93", "88", "44.9", "", ""], ["B39", "2027-03-19", "Memphis Kings", "Home", "L", "95", "111", "46.7", "4925", "34"], ["B40", "2027-03-22", "Fort Myers Waves", "Away", "W", "119", "98", "43.5", "", ""]]}};
+const TYPES = ["Duplicate row","Missing value","Impossible value","Inconsistent text","Wrong format or data type"];
+// errors: key = row index (0-based data row) + ":" + column name ("*" = whole row)
+const ERR = {
+ soc: {
+  "3:opponent": {types:[3], fixes:["Delete the row","Change it to \"Charlotte Crowns\" so it matches the other rows","Leave it, a computer can tell they are the same"], fix:1, why:"Lowercase letters and an extra space make \"charlotte crowns \" look like a different team in a pivot table."},
+  "5:date": {types:[4], fixes:["Rewrite it as 2026-04-15, the same format as every other date","Delete the date","Leave it, it is still a date"], fix:0, why:"Mixed date formats sort and filter incorrectly. One format for the whole column."},
+  "8:attendance": {types:[1], fixes:["Type 0","Fill it with the season average and say nothing","Look up the official figure; if you cannot, leave it blank, exclude it from averages, and note it in the log"], fix:2, why:"This was a home match, so a crowd was counted. A 0 would drag the average down, and a silent guess hides the problem."},
+  "10:*": {types:[0], fixes:["Delete the extra copy of S10","Keep both rows","Delete both rows"], fix:0, why:"S10 appears twice. Keeping both would count that match twice in every total."},
+  "13:possession_pct": {types:[2], fixes:["Change it to 100","Check the source and use the true value (70), or mark it as missing","Leave it"], fix:1, why:"Possession is a percentage of the match and can never be above 100. Do not guess; check the original record."},
+  "25:home_away": {types:[3,2], fixes:["Change it to \"Home\"","Check the schedule; with no attendance or ticket price recorded, it was an away match, so correct it to \"Away\"","Delete the row"], fix:1, why:"\"home\" is the wrong case, and it contradicts the rest of the row: home matches always have attendance and a ticket price. The schedule confirms it was away."},
+  "31:goals_for": {types:[2], fixes:["Change it to 1","Look up the official score and correct it (it was 0)","Leave it, it is close enough"], fix:1, why:"A team cannot score a negative number of goals. The official match report shows 0."}
+ },
+ bb: {
+  "2:opponent": {types:[3], fixes:["Change it to \"Jacksonville Jets\" so it matches the other rows","Delete the row","Leave it"], fix:0, why:"ALL CAPS text is treated as a different value when you group or filter by opponent."},
+  "6:*": {types:[0], fixes:["Keep both rows","Delete the extra copy of B06","Delete both rows"], fix:1, why:"B06 appears twice, which would double count that game."},
+  "8:date": {types:[4], fixes:["Rewrite it as 2026-11-30, the same format as the other dates","Delete it","Leave it"], fix:0, why:"\"30-Nov-2026\" uses a different format from the rest of the column, so sorting by date breaks."},
+  "11:attendance": {types:[1], fixes:["Type 0","Look up the official figure; if you cannot, leave it blank, exclude it from averages, and note it","Copy the attendance from the row above"], fix:1, why:"It is a home game, so attendance exists somewhere. Never fill a blank with a made-up number."},
+  "15:fg_pct": {types:[2], fixes:["Change it to 100","Check the box score and use the true value (49.7)","Divide it by 2"], fix:1, why:"Field goal percentage cannot be above 100. Check the source instead of guessing."},
+  "19:attendance": {types:[4], fixes:["Remove the extra space so the cell is a number again (TRIM, then VALUE)","Delete the value","Leave it"], fix:0, why:"A hidden space turns 4580 into text: notice it sits on the left. Spreadsheets skip text when they add or average."},
+  "23:avg_ticket_price": {types:[4], fixes:["Change it to 30","Look up the real price in the ticketing data instead of guessing (it was $24)","Delete the row"], fix:1, why:"Words in a number column cannot be calculated. And the word may be wrong too: the ticketing system shows $24."},
+  "27:result": {types:[3,2], fixes:["Change it to \"W\"","Check the score: the Breakers scored 114 and allowed 120, so correct it to \"L\"","Leave it"], fix:1, why:"\"win\" does not match the W/L codes, and the score shows a loss, so the value is also wrong."},
+  "33:points_for": {types:[1], fixes:["Type 0","Look up the box score and fill in the real value (102)","Use the season average"], fix:1, why:"Every played game has a score. The box score shows 102."}
+ }
+};
+const state = {soc:{logs:{},finished:false}, bb:{logs:{},finished:false}};
+let team = "soc", sel = null, pickType = null, pickFix = null;
+const isNum = v => /^-?\d+(\.\d+)?$/.test(v);
+
+function errKey(r,c){ const E = ERR[team]; if(E[r+":*"]) return r+":*"; return E[r+":"+c] ? r+":"+c : null; }
+
+function renderTable(){
+  const T = RAW[team], st = state[team];
+  let h = `<table class="sheet"><thead><tr><th class="rn">#</th>${T.cols.map(c=>`<th scope="col">${c}</th>`).join("")}</tr></thead><tbody>`;
+  T.rows.forEach((row,r)=>{
+    h += `<tr><td class="rn">${r+2}</td>`;
+    row.forEach((v,ci)=>{
+      const c = T.cols[ci], k = errKey(r,c), lk = r+":"+c;
+      let cls = isNum(v)?"num":"";
+      const log = st.logs[k] || st.logs[lk];
+      if(log){ cls += log.err ? (log.full?" found":" partial") : " fp"; }
+      else if(st.finished && k) cls += " miss";
+      h += `<td class="${cls}"><button type="button" data-r="${r}" data-c="${c}" aria-label="Row ${r+2}, ${c}: ${v===""?"empty":v}">${v===""?" ":v.replace(/</g,"&lt;")}</button></td>`;
+    });
+    h += "</tr>";
+  });
+  h += "</tbody></table>";
+  const wrap = document.getElementById("wrap"); const top = wrap.scrollTop, left = wrap.scrollLeft;
+  wrap.innerHTML = h; wrap.scrollTop = top; wrap.scrollLeft = left;
+  wrap.querySelectorAll("td button").forEach(b=>b.addEventListener("click",()=>select(+b.dataset.r,b.dataset.c)));
+}
+
+function select(r,c){
+  const st = state[team]; if(st.finished) return;
+  sel = {r,c}; pickType = null; pickFix = null;
+  const T = RAW[team], v = T.rows[r][T.cols.indexOf(c)], k = errKey(r,c);
+  const already = st.logs[k] || st.logs[r+":"+c];
+  const p = document.getElementById("panel");
+  if(already){ p.innerHTML = `<h2>Already logged</h2><p>You already logged row ${r+2}. Pick another cell.</p>`; return; }
+  const fixes = k ? ERR[team][k].fixes : ["Fix the value","Delete the row","Leave it as it is"];
+  p.innerHTML = `<h2>Row ${r+2}, ${c}</h2><div class="cellinfo">Value: ${v===""?"(empty)":JSON.stringify(v)}\nRow: ${T.rows[r].map(x=>x===""?"·":x).join(" | ")}</div>
+    <h3>1. What kind of problem is it?</h3>${TYPES.map((t,j)=>`<button type="button" class="opt ty" data-j="${j}" aria-pressed="false">${t}</button>`).join("")}<button type="button" class="opt ty" data-j="-1" aria-pressed="false">Nothing is wrong here</button>
+    <h3 style="margin-top:12px">2. Best fix</h3>${fixes.map((t,j)=>`<button type="button" class="opt fx" data-j="${j}" aria-pressed="false">${t}</button>`).join("")}
+    <div style="margin-top:10px"><button type="button" class="btn primary" id="logBtn">Log this problem</button></div><div id="pfb"></div>`;
+  p.querySelectorAll(".ty").forEach(b=>b.addEventListener("click",()=>{ pickType=+b.dataset.j; p.querySelectorAll(".ty").forEach(x=>x.setAttribute("aria-pressed",x===b)); }));
+  p.querySelectorAll(".fx").forEach(b=>b.addEventListener("click",()=>{ pickFix=+b.dataset.j; p.querySelectorAll(".fx").forEach(x=>x.setAttribute("aria-pressed",x===b)); }));
+  document.getElementById("logBtn").addEventListener("click",logIt);
+  if(window.innerWidth<900) p.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function logIt(){
+  const pfb = document.getElementById("pfb");
+  if(pickType===null){ pfb.innerHTML = `<div class="feedback bad">Choose a problem type first.</div>`; return; }
+  if(pickType===-1){ document.getElementById("panel").innerHTML = `<h2>Pick a cell</h2><p>Okay, nothing logged for that cell.</p>`; return; }
+  if(pickFix===null){ pfb.innerHTML = `<div class="feedback bad">Choose a fix too.</div>`; return; }
+  const {r,c} = sel, k = errKey(r,c), st = state[team];
+  if(k){
+    const e = ERR[team][k], typeOk = e.types.includes(pickType), fixOk = pickFix===e.fix;
+    st.logs[k] = {err:true, typeOk, fixOk, full:typeOk&&fixOk, row:r, label:k.split(":")[1]==="*"?"whole row":k.split(":")[1]};
+    pfb.innerHTML = "";
+    document.getElementById("panel").innerHTML = `<h2>Logged row ${r+2}</h2><div class="feedback ${typeOk&&fixOk?'ok':'info'}">${typeOk?'Problem type: correct.':'Problem type: not quite. It is "'+TYPES[e.types[0]]+'".'} ${fixOk?'Fix: correct.':'Better fix: '+e.fixes[e.fix]} <br>${e.why}</div>`;
+  } else {
+    st.logs[r+":"+c] = {err:false,row:r,label:c};
+    document.getElementById("panel").innerHTML = `<h2>Logged row ${r+2}</h2><div class="feedback bad">This value is fine. Logging a correct value costs 2 points, because "fixing" good data creates new errors.</div>`;
+  }
+  renderAll();
+}
+
+function computeScore(t){
+  const E = ERR[t], n = Object.keys(E).length, per = 100/n, st = state[t];
+  let s = 0, fp = 0;
+  Object.values(st.logs).forEach(l=>{ if(l.err) s += per*((l.typeOk?0.6:0)+(l.fixOk?0.4:0)); else fp++; });
+  return Math.max(0, Math.round(s - 2*fp));
+}
+
+function renderAll(){
+  const st = state[team];
+  document.getElementById("score").textContent = computeScore(team);
+  const logs = Object.entries(st.logs).sort((a,b)=>a[1].row-b[1].row);
+  document.getElementById("found").textContent = logs.length + " logged";
+  document.getElementById("log").innerHTML = logs.length ? logs.map(([k,l])=>`<li>Row ${l.row+2}, ${l.label}: ${l.err?(l.full?"fixed correctly":"found, partly right"):"not an error (−2)"}</li>`).join("") : `<li style="list-style:none;margin-left:-20px;color:var(--muted)">Nothing logged yet.</li>`;
+  renderTable();
+  document.getElementById("done").hidden = st.finished;
+  document.getElementById("summary").innerHTML = st.finished ? summary() : "";
+}
+
+function summary(){
+  const E = ERR[team], st = state[team], keys = Object.keys(E);
+  const missed = keys.filter(k=>!st.logs[k]);
+  const found = keys.length - missed.length;
+  return `<div class="feedback ${found===keys.length?'ok':'info'}" style="margin-top:12px"><b>Final score: ${computeScore(team)}/100.</b> You found ${found} of ${keys.length} errors.${missed.length?` Missed errors are outlined in red in the table:<ul>${missed.map(k=>{const [r,c]=k.split(":"); return `<li>Row ${+r+2}${c==="*"?" (duplicate row)":", "+c}: ${E[k].why}</li>`;}).join("")}</ul>`:" Every error found."}</div>
+    <p style="font-size:14px">Real cleaning ends with a cleaning log like yours, so anyone can see what was changed and why. You will write one in Assignment 2.1.</p>
+    <button type="button" class="btn" id="redo">Start this file again</button>`;
+}
+
+document.getElementById("done").addEventListener("click",()=>{ state[team].finished = true; document.getElementById("panel").innerHTML = `<h2>Finished</h2><p>See your results below. Switch files to try the other one.</p>`; renderAll(); });
+document.getElementById("summary").addEventListener("click",e=>{ if(e.target.id==="redo"){ state[team] = {logs:{},finished:false}; document.getElementById("panel").innerHTML = `<h2>Pick a cell</h2><p>Click a cell in the table to inspect it.</p>`; renderAll(); } });
+function setTeam(t){ team=t; document.getElementById("tSoc").setAttribute("aria-pressed",t==="soc"); document.getElementById("tBb").setAttribute("aria-pressed",t==="bb"); document.getElementById("panel").innerHTML = `<h2>Pick a cell</h2><p>Click a cell in the table to inspect it.</p>`; renderAll(); }
+document.getElementById("tSoc").addEventListener("click",()=>setTeam("soc"));
+document.getElementById("tBb").addEventListener("click",()=>setTeam("bb"));
+renderAll();
+
+</script>
+</body>
+</html>
