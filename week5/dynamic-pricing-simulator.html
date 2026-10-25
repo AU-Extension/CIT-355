@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dynamic Pricing Simulator</title>
+<meta name="description" content="CIT 355 Week 5 interactive: set ticket prices by section and see tickets sold, revenue, and fan sentiment for the Biscayne Bay clubs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .seg button{font:inherit;font-size:14px;font-weight:600;border:0;background:#fff;padding:8px 14px;cursor:pointer;color:var(--ink-2)}
+  .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .controls{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-top:14px}
+  .controls label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+  .controls select{width:100%}
+  .sec-row{border-top:1px solid var(--line);padding:12px 0}
+  .sec-row:first-child{border-top:0}
+  .sec-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+  .sec-head b{font-size:15px}
+  .sec-head .std{font-size:12px;color:var(--muted)}
+  .price-line{display:flex;align-items:center;gap:10px;margin-top:6px}
+  .price-line input[type=range]{flex:1;accent-color:var(--au-red)}
+  .price-val{font-family:var(--mono);font-weight:600;min-width:74px;text-align:right}
+  .bar{height:10px;background:#EEF1F5;border-radius:6px;overflow:hidden;margin-top:6px}
+  .bar > i{display:block;height:100%;background:var(--net-blue);border-radius:6px;width:0}
+  .bar > i.full{background:var(--net-green)}
+  .sec-stats{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-top:4px}
+  .kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi span{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .kpi b{font-size:20px}
+  .kpi.total{grid-column:1/-1;background:#16181D;color:#fff;border-color:#16181D}
+  .kpi.total span{color:#C9CED6}
+  .meter{height:14px;border-radius:8px;background:linear-gradient(90deg,#B91C1C 0%,#B45309 45%,#15803D 75%,#15803D 100%);position:relative;margin:8px 0 4px}
+  .meter i{position:absolute;top:-5px;width:4px;height:24px;background:#16181D;border-radius:2px;left:0;transform:translateX(-2px)}
+  .meter-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .tips li{margin-bottom:6px}
+  .chartwrap{margin-top:8px}
+  .chartwrap svg{width:100%;height:auto;display:block}
+  .small{font-size:13px;color:var(--muted)}
+
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 5 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 5 · Explorer</span>
+    <h1>Dynamic pricing simulator</h1>
+    <p class="lede">Set ticket prices for one home game and watch what happens to tickets sold, revenue, and how fans feel. Change the opponent, the day, the weather, and the promotion to see why the same seat is worth more on some nights than others.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol>
+      <li>Choose Biscayne Bay FC (soccer) or the Biscayne Bay Breakers (basketball).</li>
+      <li>Describe the game: opponent strength, rivalry, day, weather (soccer only), and promotion.</li>
+      <li>Move the price slider for each seating section. Every result updates right away.</li>
+      <li>Pick a section under "Revenue curve" to see where its ticket revenue peaks.</li>
+      <li>Watch the fan sentiment meter: the highest revenue is not always the smartest price.</li>
+    </ol>
+    <p class="small">All numbers come from a simple model built for the fictional Biscayne Bay clubs, based on the patterns in the course file ticket_sales.csv. Concessions use $23 per fan, the average spent per game in fans.csv.</p>
+  </details>
+
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+      <div class="seg" role="group" aria-label="Team">
+        <button type="button" data-team="soccer" aria-pressed="true">Biscayne Bay FC (soccer)</button>
+        <button type="button" data-team="basketball" aria-pressed="false">Breakers (basketball)</button>
+      </div>
+      <span class="small" id="venue"></span>
+    </div>
+    <div class="controls">
+      <div><label for="opp">Opponent strength</label><select id="opp"><option value="weak">Weak (bottom of the table)</option><option value="average" selected>Average</option><option value="strong">Strong (top of the table)</option></select></div>
+      <div><label for="riv">Rivalry game?</label><select id="riv"><option value="no">No</option><option value="yes">Yes, a rival</option></select></div>
+      <div><label for="day">Day</label><select id="day"><option value="weekend" selected>Weekend (Fri to Sun)</option><option value="weekday">Weekday</option></select></div>
+      <div id="wxbox"><label for="wx">Weather forecast</label><select id="wx"><option value="clear">Clear</option><option value="hot">Hot and humid</option><option value="rain">Rain</option></select></div>
+      <div><label for="promo">Promotion</label><select id="promo"></select></div>
+    </div>
+  </section>
+
+  <div class="grid two" style="margin-top:16px">
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0">Prices by section</h2>
+        <button class="btn" type="button" id="reset">Reset to standard prices</button>
+      </div>
+      <div id="sections" style="margin-top:8px"></div>
+    </section>
+    <aside class="card">
+      <h2>Game results</h2>
+      <div class="kpis">
+        <div class="kpi"><span>Attendance</span><b id="k-att">0</b></div>
+        <div class="kpi"><span>Fill rate</span><b id="k-fill">0%</b></div>
+        <div class="kpi"><span>Ticket revenue</span><b id="k-tix">$0</b></div>
+        <div class="kpi"><span>Concessions (est.)</span><b id="k-conc">$0</b></div>
+        <div class="kpi"><span>Promotion cost</span><b id="k-promo">$0</b></div>
+        <div class="kpi"><span>Average price vs standard</span><b id="k-idx">100%</b></div>
+        <div class="kpi total"><span>Game-day revenue (tickets + concessions minus promotion)</span><b id="k-total">$0</b></div>
+      </div>
+      <h3 style="margin-top:16px">Fan sentiment: <span id="sent-label">Happy</span></h3>
+      <div class="meter" aria-hidden="true"><i id="sent-needle"></i></div>
+      <div class="meter-labels"><span>Upset</span><span>Okay</span><span>Happy</span></div>
+      <p class="small" id="sent-why"></p>
+    </aside>
+  </div>
+
+  <div class="grid two" style="margin-top:16px">
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+        <h2 style="margin:0">Revenue curve</h2>
+        <select id="curveSec" aria-label="Section for revenue curve"></select>
+      </div>
+      <div class="chartwrap" id="curve"></div>
+      <p class="small" id="curveNote"></p>
+    </section>
+    <aside class="card">
+      <h2>What the numbers are telling you</h2>
+      <ul class="tips" id="tips"></ul>
+      <h3 style="margin-top:12px">Price sensitivity in plain words</h3>
+      <table class="data" id="sens"><thead><tr><th>Section</th><th>If price rises 10%</th></tr></thead><tbody></tbody></table>
+    </aside>
+  </div>
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+// Shared ticket demand model for CIT 355 Week 5 (fictional Biscayne Bay clubs).
+const TEAMS = {
+  soccer: {
+    name: "Biscayne Bay FC", venue: "12,000-seat open-air stadium", capacity: 12000,
+    sections: [
+      {id:"sup", name:"Supporters End", cap:2400, base:22, fill:0.70, b:0.6, core:true},
+      {id:"low", name:"Lower Bowl", cap:5200, base:40, fill:0.66, b:0.9},
+      {id:"up",  name:"Upper Deck", cap:3800, base:25, fill:0.66, b:1.2},
+      {id:"club",name:"Club Seats", cap:600, base:95, fill:0.68, b:0.7}
+    ],
+    promos: [
+      {id:"none", name:"No promotion", lift:1.00, perFan:0, flat:0},
+      {id:"give", name:"Fan giveaway (scarf)", lift:1.10, perFan:4, flat:0},
+      {id:"fire", name:"Postgame fireworks", lift:1.07, perFan:0, flat:25000}
+    ],
+    weather: true
+  },
+  basketball: {
+    name: "Biscayne Bay Breakers", venue: "6,000-seat indoor arena", capacity: 6000,
+    sections: [
+      {id:"court", name:"Courtside", cap:120, base:180, fill:0.78, b:0.6},
+      {id:"low", name:"Lower Level", cap:2300, base:55, fill:0.77, b:0.9},
+      {id:"up",  name:"Upper Level", cap:3300, base:28, fill:0.75, b:1.2},
+      {id:"stu", name:"Student Section", cap:280, base:12, fill:0.80, b:0.5, core:true}
+    ],
+    promos: [
+      {id:"none", name:"No promotion", lift:1.00, perFan:0, flat:0},
+      {id:"give", name:"Bobblehead giveaway", lift:1.10, perFan:4, flat:0},
+      {id:"fire", name:"Halftime concert", lift:1.07, perFan:0, flat:15000}
+    ],
+    weather: false
+  }
+};
+const FACTORS = {
+  opponent: {weak:0.90, average:1.00, strong:1.10},
+  rivalry: {no:1.00, yes:1.18},
+  day: {weekday:0.92, weekend:1.15},
+  weather: {clear:1.00, hot:0.94, rain:0.82}
+};
+const CONCESSIONS_PER_FAN = 23; // average concessions per game attended, from fans.csv (23.05)
+
+function demandFactor(team, g){
+  let f = FACTORS.opponent[g.opponent] * FACTORS.rivalry[g.rivalry] * FACTORS.day[g.day];
+  if (TEAMS[team].weather) f *= FACTORS.weather[g.weather || "clear"];
+  const promo = TEAMS[team].promos.find(p=>p.id===(g.promo||"none"));
+  return f * promo.lift;
+}
+function sectionSold(sec, price, factor){
+  const want = sec.cap * sec.fill * factor * Math.exp(-sec.b * (price/sec.base - 1));
+  return Math.max(0, Math.min(sec.cap, Math.round(want)));
+}
+// prices: {sectionId: price}
+function evaluate(team, g, prices){
+  const T = TEAMS[team]; const factor = demandFactor(team, g);
+  const promo = T.promos.find(p=>p.id===(g.promo||"none"));
+  let sold=0, tix=0, cap=0, idxW=0, coreIdx=1;
+  const rows = T.sections.map(sec=>{
+    const p = prices[sec.id]; const s = sectionSold(sec, p, factor);
+    sold+=s; tix+=s*p; cap+=sec.cap; idxW += s*(p/sec.base);
+    if (sec.core) coreIdx = p/sec.base;
+    return {id:sec.id, name:sec.name, cap:sec.cap, price:p, sold:s, fill:s/sec.cap, revenue:s*p};
+  });
+  const fill = sold/cap;
+  const conc = sold*CONCESSIONS_PER_FAN;
+  const promoCost = promo.perFan*sold + promo.flat;
+  const idx = sold ? idxW/sold : 1;
+  let sentiment = 100 - 120*Math.max(0, idx-1.05) - 80*Math.max(0, coreIdx-1.10) - 60*Math.max(0, 0.60-fill) + (promo.id!=="none"?5:0);
+  sentiment = Math.max(0, Math.min(100, Math.round(sentiment)));
+  return {rows, sold, cap, fill, tickets:tix, concessions:conc, promoCost, total:tix+conc-promoCost, sentiment, priceIndex:idx, factor};
+}
+function sentimentLabel(s){ return s>=70?"Happy":(s>=45?"Okay":"Upset"); }
+function uniformPrices(team, level){ const o={}; TEAMS[team].sections.forEach(s=>o[s.id]=Math.round(s.base*level*100)/100); return o; }
+
+const hasGSAP = typeof window.gsap !== 'undefined';
+let team = "soccer"; let prices = {};
+const $ = s => document.querySelector(s);
+const money = v => "$" + Math.round(v).toLocaleString("en-US");
+const pct = v => Math.round(v*100) + "%";
+
+function game(){ return {opponent:$("#opp").value, rivalry:$("#riv").value, day:$("#day").value, weather:$("#wx").value, promo:$("#promo").value}; }
+
+function setupTeam(){
+  const T = TEAMS[team];
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.team===team ? "true":"false"));
+  $("#venue").textContent = T.name + ", " + T.venue;
+  $("#wxbox").hidden = !T.weather;
+  $("#promo").innerHTML = T.promos.map(p=>{
+    const cost = p.perFan ? " ($"+p.perFan+" per fan)" : (p.flat ? " ($"+p.flat.toLocaleString("en-US")+" flat)" : "");
+    return '<option value="'+p.id+'">'+p.name+cost+'</option>';
+  }).join("");
+  prices = uniformPrices(team, 1);
+  $("#sections").innerHTML = T.sections.map(s=>{
+    const step = s.base < 20 ? 0.5 : 1;
+    return '<div class="sec-row" data-sec="'+s.id+'">'+
+      '<div class="sec-head"><b>'+s.name+'</b><span class="std">'+s.cap.toLocaleString("en-US")+' seats · standard price '+money(s.base)+'</span></div>'+
+      '<div class="price-line"><input type="range" min="'+(s.base*0.5)+'" max="'+(s.base*2)+'" step="'+step+'" value="'+s.base+'" aria-label="Price for '+s.name+'"><span class="price-val"></span></div>'+
+      '<div class="bar"><i></i></div><div class="sec-stats"><span class="sold"></span><span class="rev"></span></div></div>';
+  }).join("");
+  document.querySelectorAll(".sec-row input").forEach(inp=>{
+    inp.addEventListener("input", e=>{ const id=e.target.closest(".sec-row").dataset.sec; prices[id]=parseFloat(e.target.value); update(); });
+  });
+  $("#curveSec").innerHTML = T.sections.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join("");
+  $("#sens tbody").innerHTML = T.sections.map(s=>{
+    const drop = (1-Math.exp(-s.b*0.10))*100;
+    const word = s.b>=1.1 ? "very price sensitive" : (s.b>=0.8 ? "price sensitive" : "loyal, less sensitive");
+    return '<tr><td>'+s.name+'</td><td>About '+drop.toFixed(0)+'% fewer tickets ('+word+')</td></tr>';
+  }).join("");
+  update();
+}
+
+function update(){
+  const T = TEAMS[team]; const g = game(); const r = evaluate(team, g, prices);
+  r.rows.forEach(row=>{
+    const el = document.querySelector('.sec-row[data-sec="'+row.id+'"]');
+    el.querySelector(".price-val").textContent = money(row.price).replace(/^\$/, "$") + (row.price % 1 ? "" : "");
+    el.querySelector(".price-val").textContent = "$" + (row.price % 1 ? row.price.toFixed(2) : row.price);
+    const bar = el.querySelector(".bar i");
+    const w = (row.fill*100).toFixed(1)+"%";
+    if (hasGSAP) gsap.to(bar, {width:w, duration:0.35, ease:"power2.out"}); else bar.style.width = w;
+    bar.classList.toggle("full", row.sold >= row.cap);
+    el.querySelector(".sold").textContent = row.sold.toLocaleString("en-US")+" sold ("+pct(row.fill)+")" + (row.sold>=row.cap ? " · sold out" : "");
+    el.querySelector(".rev").textContent = "Revenue " + money(row.revenue);
+  });
+  $("#k-att").textContent = r.sold.toLocaleString("en-US");
+  $("#k-fill").textContent = pct(r.fill);
+  $("#k-tix").textContent = money(r.tickets);
+  $("#k-conc").textContent = money(r.concessions);
+  $("#k-promo").textContent = money(r.promoCost);
+  $("#k-idx").textContent = pct(r.priceIndex);
+  $("#k-total").textContent = money(r.total);
+  $("#sent-label").textContent = sentimentLabel(r.sentiment) + " (" + r.sentiment + "/100)";
+  const needle = $("#sent-needle"); const left = r.sentiment + "%";
+  if (hasGSAP) gsap.to(needle, {left:left, duration:0.35}); else needle.style.left = left;
+  const why = [];
+  if (r.priceIndex > 1.05) why.push("Fans notice that the average ticket costs " + pct(r.priceIndex - 1) + " more than usual.");
+  const core = T.sections.find(s=>s.core);
+  if (prices[core.id]/core.base > 1.10) why.push("The " + core.name + " is home to the most loyal fans, and raising its price hurts goodwill quickly.");
+  if (r.fill < 0.60) why.push("A half-empty venue feels flat on television and in the stands.");
+  if (g.promo !== "none") why.push("The promotion gives fans a little extra goodwill.");
+  if (!why.length) why.push("Prices feel fair and the venue is lively.");
+  $("#sent-why").textContent = why.join(" ");
+  tips(r, g);
+  drawCurve();
+}
+
+function tips(r, g){
+  const T = TEAMS[team]; const out = []; const f = demandFactor(team, g);
+  r.rows.forEach(row=>{
+    const sec = T.sections.find(s=>s.id===row.id);
+    const peak = peakPrice(sec, f);
+    if (row.sold >= row.cap) out.push(row.name + " is sold out. Demand is higher than supply, so a slightly higher price would likely still fill it.");
+    else if (row.price > peak.price * 1.08) out.push(row.name + " is priced past its revenue peak (about " + money(peak.price) + "). Lowering it would bring in more fans and more money.");
+  });
+  if (r.fill < 0.70) out.push("Fill rate is under 70%. Empty seats also mean lost concessions, about $23 per missing fan.");
+  if (g.promo !== "none" && r.fill > 0.97) out.push("The venue is nearly full, so the promotion adds cost without adding many fans.");
+  if (!out.length) out.push("No warning signs. Try a rivalry game or rain to see how demand changes.");
+  $("#tips").innerHTML = out.map(t=>"<li>"+t+"</li>").join("");
+}
+
+function peakPrice(sec, f){
+  let best = {price:sec.base, rev:0};
+  for (let p = sec.base*0.5; p <= sec.base*2.0001; p += sec.base/100){
+    const s = sectionSold(sec, p, f); if (s*p > best.rev) best = {price:p, rev:s*p};
+  }
+  return best;
+}
+
+function drawCurve(){
+  const T = TEAMS[team]; const sec = T.sections.find(s=>s.id===$("#curveSec").value) || T.sections[0];
+  const f = demandFactor(team, game());
+  const W=520,H=240,L=58,R=14,Tp=14,B=38;
+  const pts=[]; for(let i=0;i<=60;i++){ const p=sec.base*(0.5+1.5*i/60); pts.push([p, sectionSold(sec,p,f)*p]); }
+  const maxR = Math.max(...pts.map(p=>p[1]))*1.1;
+  const x = p => L + (p - sec.base*0.5)/(sec.base*1.5)*(W-L-R);
+  const y = v => H - B - v/maxR*(H-Tp-B);
+  const peak = peakPrice(sec, f); const cur = prices[sec.id]; const curRev = sectionSold(sec,cur,f)*cur;
+  let ticks=""; for(let i=0;i<=4;i++){ const v=maxR*i/4; ticks+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#E3E6EB"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" font-size="11" text-anchor="end" fill="#6B7280">'+(v>=1000?"$"+Math.round(v/1000)+"k":"$"+Math.round(v))+'</text>'; }
+  let xt=""; [0.5,1,1.5,2].forEach(m=>{ const p=sec.base*m; xt+='<text x="'+x(p)+'" y="'+(H-B+16)+'" font-size="11" text-anchor="middle" fill="#6B7280">$'+(p%1?p.toFixed(2):p)+'</text>'; });
+  const path = pts.map((p,i)=>(i?"L":"M")+x(p[0]).toFixed(1)+" "+y(p[1]).toFixed(1)).join(" ");
+  $("#curve").innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Ticket revenue for '+sec.name+' at different prices">'+ticks+xt+
+    '<text x="'+((L+W-R)/2)+'" y="'+(H-4)+'" font-size="12" text-anchor="middle" fill="#3B4250">Ticket price</text>'+
+    '<path d="'+path+'" fill="none" stroke="#2563EB" stroke-width="3"/>'+
+    '<line x1="'+x(peak.price)+'" x2="'+x(peak.price)+'" y1="'+Tp+'" y2="'+(H-B)+'" stroke="#15803D" stroke-dasharray="4 4"/>'+
+    '<text x="'+(x(peak.price)+4)+'" y="'+(Tp+12)+'" font-size="11" fill="#15803D">peak '+money(peak.price)+'</text>'+
+    '<circle cx="'+x(cur)+'" cy="'+y(curRev)+'" r="7" fill="#E1141E" stroke="#fff" stroke-width="2"/></svg>';
+  const s = sectionSold(sec, sec.base*0.5, f) >= sec.cap ? " At low prices the line rises straight up because the section sells out: you cannot sell more seats than you have." : "";
+  $("#curveNote").textContent = "The red dot is your current price ("+money(cur)+", ticket revenue "+money(curRev)+"). Revenue for this section peaks near "+money(peak.price)+". Above the peak, each price increase loses more fans than it gains in dollars."+s;
+}
+
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click", ()=>{ team=b.dataset.team; setupTeam(); }));
+["#opp","#riv","#day","#wx","#promo"].forEach(id=>$(id).addEventListener("change", update));
+$("#curveSec").addEventListener("change", drawCurve);
+$("#reset").addEventListener("click", ()=>{ prices = uniformPrices(team,1); document.querySelectorAll(".sec-row").forEach(el=>{ el.querySelector("input").value = prices[el.dataset.sec]; }); update(); });
+setupTeam();
+
+</script>
+</body>
+</html>

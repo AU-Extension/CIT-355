@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sponsorship ROI Challenge</title>
+<meta name="description" content="CIT 355 Week 6 challenge: calculate sponsor CPM, cost per lead, and return on investment, then make renewal decisions for the Biscayne Bay Sports Group.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+
+  .formula{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:12px 0}
+  .formula div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+  .formula b{display:block}
+  .spon{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:#fff}
+  .spon h3{margin:0 0 4px}
+  .facts{display:flex;gap:8px 16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-bottom:8px}
+  .facts b{color:var(--ink)}
+  .inputs{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+  .inputs label{display:block;font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:4px}
+  .inputs input{width:100%}
+  .mark{font-size:13px;margin-top:6px;min-height:18px}
+  .mark.ok{color:var(--ok)} .mark.bad{color:var(--bad)}
+  .choices{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .choices button{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer}
+  .choices button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .choices button.right{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .choices button.wrong{background:var(--bad);color:#fff;border-color:var(--bad)}
+  .why{font-size:14px;margin-top:8px}
+  .metric-pills{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .partscore{font-weight:600;margin-top:12px}
+  .act select{width:100%;margin-top:6px}
+  .small{font-size:13px;color:var(--muted)}
+  .steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .steps span{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .steps span.on{background:var(--ink);color:#fff}
+  .steps span.done{background:var(--ok-soft);color:#14532D}
+
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 6 · Interactive B</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 6 · Challenge</span>
+    <h1>Sponsorship return on investment challenge</h1>
+    <p class="lede">The Biscayne Bay Sports Group earns millions from sponsors, and renewal season is here. Calculate what each deal delivers, decide which sponsors to renew, renegotiate, or replace, and match sponsors to activation ideas that turn fans into customers.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this challenge</summary>
+    <ol>
+      <li>Part 1 (36 points): calculate cost per thousand impressions, cost per lead, and return on investment for four sponsors.</li>
+      <li>Part 2 (36 points): use the numbers to decide what to do with six sponsors at renewal time.</li>
+      <li>Part 3 (28 points): match four sponsors to the activation idea that best fits their goal.</li>
+      <li>Each part is checked when you press its button. Your final score appears at the end.</li>
+    </ol>
+    <p class="small">The figures come from the course file sponsors.csv. "Attributed sales" are the sponsor's own sales that they can trace back to the partnership, for example through coupon codes.</p>
+  </details>
+
+  <div class="steps" id="steps"><span class="on">Part 1</span><span>Part 2</span><span>Part 3</span><span>Score</span></div>
+
+  <section class="card" id="part1">
+    <h2>Part 1: run the numbers</h2>
+    <div class="formula">
+      <div><b>Cost per thousand impressions (CPM)</b>annual fee ÷ media impressions × 1,000. What it costs to put the brand in front of 1,000 people. Lower is cheaper reach.</div>
+      <div><b>Cost per lead</b>annual fee ÷ leads generated. What it costs to collect one interested customer (an email, a test drive, a sign-up). Lower is better.</div>
+      <div><b>Return on investment (ROI)</b>(attributed sales − annual fee) ÷ annual fee × 100. Above 0% the sponsor earned back more than it paid.</div>
+    </div>
+    <p class="small">Round CPM and cost per lead to cents and ROI to one decimal place. Answers within 2% (or within 1 point for ROI) count as correct.</p>
+    <div id="p1list"></div>
+    <button class="btn primary" type="button" id="check1" style="margin-top:14px">Check Part 1</button>
+    <div class="partscore" id="s1"></div>
+  </section>
+
+  <section class="card" id="part2" hidden style="margin-top:16px">
+    <h2>Part 2: renewal decisions</h2>
+    <p style="margin-top:0">For each sponsor choose one action. <b>Renew</b> keeps the deal as it is. <b>Renegotiate</b> changes the price or adds activations so it works better. <b>Replace</b> means preparing a new partner for the category.</p>
+    <div id="p2list"></div>
+    <button class="btn primary" type="button" id="check2" style="margin-top:14px">Check Part 2</button>
+    <div class="partscore" id="s2"></div>
+  </section>
+
+  <section class="card" id="part3" hidden style="margin-top:16px">
+    <h2>Part 3: match the activation</h2>
+    <p style="margin-top:0">An activation is something a sponsor does with fans, beyond showing a logo. The best ones fit the sponsor's product and can be measured.</p>
+    <div id="p3list"></div>
+    <button class="btn primary" type="button" id="check3" style="margin-top:14px">Check Part 3</button>
+    <div class="partscore" id="s3"></div>
+  </section>
+
+  <section class="card" id="final" hidden style="margin-top:16px">
+    <h2>Your score</h2>
+    <div class="score"><span class="big" id="total">0/100</span><span id="breakdown"></span></div>
+    <div class="feedback info"><b>Takeaways:</b> judge each sponsor against its own goal (awareness, leads, or sales); cheap reach is worthless if nobody buys; strong numbers win renewals, so bring the data to the meeting; and the best activations put the product in fans' hands with a way to track results.</div>
+    <button class="btn" type="button" id="again" style="margin-top:12px">Start over</button>
+  </section>
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+const P1=[{"name": "Calle Ocho Caf\u00e9", "category": "Food and beverage", "team": "Soccer", "fee": 60000, "imp": 2255752, "events": 5, "leads": 900, "sales": 54742, "status": "Renewing", "cpm": 26.6, "cpl": 66.67, "roi": -8.8}, {"name": "Breeze Telecom", "category": "Telecommunications", "team": "Basketball", "fee": 250000, "imp": 5509355, "events": 5, "leads": 365, "sales": 270253, "status": "Renewing", "cpm": 45.38, "cpl": 684.93, "roi": 8.1}, {"name": "FitLife Gyms", "category": "Fitness", "team": "Both", "fee": 110000, "imp": 4419135, "events": 14, "leads": 1475, "sales": 133200, "status": "Renewing", "cpm": 24.89, "cpl": 74.58, "roi": 21.1}, {"name": "Coral Auto Group", "category": "Automotive", "team": "Both", "fee": 380000, "imp": 5830397, "events": 13, "leads": 2197, "sales": 366954, "status": "At risk", "cpm": 65.18, "cpl": 172.96, "roi": -3.4}];
+const P2=[{"name": "Brickell Law Partners", "category": "Professional services", "team": "Basketball", "fee": 50000, "imp": 1662630, "events": 10, "leads": 2142, "sales": 107915, "status": "Renewing", "best": "renew", "ok": [], "why": "The lowest cost per lead in the portfolio (about $23) and sales worth more than double the fee. This deal works for both sides: renew it and use it as a case study when selling to other firms.", "cpm": 30.07, "cpl": 23.34, "roi": 115.8}, {"name": "Sol Energy Drinks", "category": "Beverage", "team": "Soccer", "fee": 220000, "imp": 3493016, "events": 3, "leads": 290, "sales": 486556, "status": "Renewing", "best": "renew", "ok": [], "why": "Leads are expensive (about $759 each), but that is not the sponsor's goal: attributed sales are more than twice the fee. Judge a sponsor against its own goal. Renew.", "cpm": 62.98, "cpl": 758.62, "roi": 121.2}, {"name": "Palmetto Insurance", "category": "Insurance", "team": "Basketball", "fee": 140000, "imp": 4752038, "events": 4, "leads": 219, "sales": 239166, "status": "Undecided", "best": "renew", "ok": ["renegotiate"], "why": "The sponsor is undecided, yet the numbers show a strong return (about 71%). The club's job is to show them this data and renew. Adding more value is fine, but the deal does not need to be rebuilt.", "cpm": 29.46, "cpl": 639.27, "roi": 70.8}, {"name": "Key Biscayne Resorts", "category": "Hospitality", "team": "Soccer", "fee": 120000, "imp": 4216632, "events": 12, "leads": 2042, "sales": 77009, "status": "Renewing", "best": "renegotiate", "ok": [], "why": "Great reach for the money and the cheapest leads in the portfolio, but sales are far below the fee (return about minus 36%). The leads are not turning into bookings, so redesign the deal: trackable booking offers for fans instead of more logos.", "cpm": 28.46, "cpl": 58.77, "roi": -35.8}, {"name": "Everglades Water", "category": "Beverage", "team": "Basketball", "fee": 90000, "imp": 3863358, "events": 9, "leads": 1307, "sales": 79023, "status": "Undecided", "best": "renegotiate", "ok": [], "why": "The cheapest reach of all sponsors (about $23 per thousand impressions) with low-cost leads, but a negative return. Fans see the brand but do not buy it. Add product sampling at games so awareness turns into sales.", "cpm": 23.3, "cpl": 68.86, "roi": -12.2}, {"name": "Magic City Health", "category": "Healthcare", "team": "Both", "fee": 300000, "imp": 4638495, "events": 10, "leads": 1370, "sales": 252564, "status": "Undecided", "best": "replace", "ok": ["renegotiate"], "why": "Expensive reach (about $65 per thousand impressions), mid-priced leads, and a negative return of about 16%, with the sponsor undecided. Start talks with other healthcare partners while offering a smaller package. Renegotiating is a reasonable first move, but the club needs a plan B.", "cpm": 64.68, "cpl": 218.98, "roi": -15.8}];
+const IDEAS=["Free water sampling stations at hot soccer matches, with a coupon code for the store", "Halftime fitness challenge on the court, with free one-month passes for every participant", "A weekend getaway raffle for season ticket holders, with a trackable booking code for everyone who enters", "A test-drive zone at the fan plaza, with a car giveaway entry for every test drive", "Logo on the stadium clock only, with no fan contact", "A sponsored postgame fireworks show with no offer or call to action"];
+const P3=[["Everglades Water", 0], ["FitLife Gyms", 1], ["Key Biscayne Resorts", 2], ["Coral Auto Group", 3]];
+
+const hasGSAP = typeof window.gsap !== 'undefined';
+const $ = s => document.querySelector(s);
+const money = v => "$" + Number(v).toLocaleString("en-US");
+let s1=0, s2=0, s3=0;
+function facts(r){ return '<div class="facts"><span>Team: <b>'+r.team+'</b></span><span>Annual fee: <b>'+money(r.fee)+'</b></span><span>Impressions: <b>'+r.imp.toLocaleString("en-US")+'</b></span><span>Events: <b>'+r.events+'</b></span><span>Leads: <b>'+r.leads.toLocaleString("en-US")+'</b></span><span>Attributed sales: <b>'+money(r.sales)+'</b></span><span>Status: <b>'+r.status+'</b></span></div>'; }
+function setStep(n){ document.querySelectorAll("#steps span").forEach((s,i)=>{ s.className = i<n ? "done" : (i===n ? "on" : ""); }); }
+
+function renderP1(){
+  $("#p1list").innerHTML = P1.map((r,i)=>'<div class="spon"><h3>'+r.name+' <span class="pill">'+r.category+'</span></h3>'+facts(r)+
+    '<div class="inputs"><div><label for="cpm'+i+'">CPM ($)</label><input id="cpm'+i+'" type="number" step="0.01" inputmode="decimal"><div class="mark" id="mcpm'+i+'"></div></div>'+
+    '<div><label for="cpl'+i+'">Cost per lead ($)</label><input id="cpl'+i+'" type="number" step="0.01" inputmode="decimal"><div class="mark" id="mcpl'+i+'"></div></div>'+
+    '<div><label for="roi'+i+'">ROI (%)</label><input id="roi'+i+'" type="number" step="0.1" inputmode="decimal"><div class="mark" id="mroi'+i+'"></div></div></div></div>').join("");
+}
+function near(v, target, kind){ if (isNaN(v)) return false; return kind==="roi" ? Math.abs(v-target) <= 1 : Math.abs(v-target) <= Math.abs(target)*0.02; }
+function check1(){
+  s1 = 0;
+  P1.forEach((r,i)=>{
+    [["cpm",r.cpm,"$"+r.cpm.toFixed(2)+" = "+money(r.fee)+" ÷ "+r.imp.toLocaleString("en-US")+" × 1,000"],
+     ["cpl",r.cpl,"$"+r.cpl.toFixed(2)+" = "+money(r.fee)+" ÷ "+r.leads.toLocaleString("en-US")],
+     ["roi",r.roi,r.roi.toFixed(1)+"% = ("+money(r.sales)+" − "+money(r.fee)+") ÷ "+money(r.fee)+" × 100"]].forEach(([k,t,show])=>{
+      const v = parseFloat($("#"+k+i).value); const ok = near(v,t,k); if (ok) s1 += 3;
+      const m = $("#m"+k+i); m.className = "mark " + (ok?"ok":"bad"); m.textContent = (ok ? "Correct: " : "Answer: ") + show;
+    });
+  });
+  $("#s1").textContent = "Part 1 score: " + s1 + "/36";
+  $("#check1").disabled = true; $("#part2").hidden = false; setStep(1);
+  if (hasGSAP) gsap.from("#part2",{opacity:0,y:12,duration:0.4});
+}
+
+const ACTIONS = [["renew","Renew"],["renegotiate","Renegotiate"],["replace","Replace"]];
+let picks2 = {};
+function renderP2(){
+  $("#p2list").innerHTML = P2.map((r,i)=>'<div class="spon" data-i="'+i+'"><h3>'+r.name+' <span class="pill">'+r.category+'</span></h3>'+facts(r)+
+    '<div class="metric-pills"><span class="pill">CPM $'+r.cpm.toFixed(2)+'</span><span class="pill">Cost per lead $'+r.cpl.toFixed(2)+'</span><span class="pill">ROI '+r.roi.toFixed(1)+'%</span></div>'+
+    '<div class="choices" role="group" aria-label="Decision for '+r.name+'">'+ACTIONS.map(a=>'<button type="button" data-a="'+a[0]+'" aria-pressed="false">'+a[1]+'</button>').join("")+'</div><div class="why" hidden></div></div>').join("");
+  document.querySelectorAll("#p2list .spon").forEach(el=>{
+    el.querySelectorAll("button").forEach(b=>b.addEventListener("click", ()=>{
+      if ($("#check2").disabled) return;
+      el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed", x===b?"true":"false")); picks2[el.dataset.i] = b.dataset.a; }));
+  });
+}
+function check2(){
+  if (Object.keys(picks2).length < P2.length){ $("#s2").textContent = "Choose an action for every sponsor first."; return; }
+  s2 = 0;
+  document.querySelectorAll("#p2list .spon").forEach(el=>{
+    const r = P2[el.dataset.i]; const p = picks2[el.dataset.i];
+    const pts = p===r.best ? 6 : (r.ok.includes(p) ? 3 : 0); s2 += pts;
+    el.querySelectorAll("button").forEach(b=>{ if (b.dataset.a===r.best) b.classList.add("right"); else if (b.dataset.a===p) b.classList.add("wrong"); });
+    const w = el.querySelector(".why"); w.hidden = false;
+    w.innerHTML = '<b>'+(pts===6?"Best choice. ":pts===3?"Reasonable, but not the best choice (3 points). ":"Not the best choice. ")+'</b>'+r.why;
+  });
+  $("#s2").textContent = "Part 2 score: " + s2 + "/36";
+  $("#check2").disabled = true; $("#part3").hidden = false; setStep(2);
+  if (hasGSAP) gsap.from("#part3",{opacity:0,y:12,duration:0.4});
+}
+
+function renderP3(){
+  $("#p3list").innerHTML = P3.map((x,i)=>'<div class="spon act"><h3>'+x[0]+'</h3><label class="small" for="act'+i+'">Best activation idea</label><select id="act'+i+'"><option value="">Choose an idea</option>'+IDEAS.map((t,j)=>'<option value="'+j+'">'+t+'</option>').join("")+'</select><div class="mark" id="mact'+i+'"></div></div>').join("");
+}
+function check3(){
+  if (P3.some((x,i)=>$("#act"+i).value==="")){ $("#s3").textContent = "Choose an idea for every sponsor first."; return; }
+  s3 = 0;
+  P3.forEach((x,i)=>{ const v = +$("#act"+i).value; const ok = v===x[1]; if (ok) s3 += 7;
+    const m = $("#mact"+i); m.className = "mark "+(ok?"ok":"bad"); m.textContent = ok ? "Correct: it fits the product and it can be measured." : "Best fit: " + IDEAS[x[1]]; $("#act"+i).disabled = true; });
+  $("#s3").textContent = "Part 3 score: " + s3 + "/28. The logo-only and fireworks ideas build no customer connection and cannot be measured, so they never fit best.";
+  $("#check3").disabled = true;
+  $("#total").textContent = (s1+s2+s3) + "/100";
+  $("#breakdown").textContent = "Calculations " + s1 + "/36 · Decisions " + s2 + "/36 · Activations " + s3 + "/28";
+  $("#final").hidden = false; setStep(3);
+  if (hasGSAP) gsap.from("#final",{opacity:0,y:12,duration:0.4});
+  $("#final").scrollIntoView({behavior:"smooth"});
+}
+function reset(){ s1=s2=s3=0; picks2={}; ["#part2","#part3","#final"].forEach(s=>$(s).hidden=true); ["#check1","#check2","#check3"].forEach(s=>$(s).disabled=false); ["#s1","#s2","#s3"].forEach(s=>$(s).textContent=""); renderP1(); renderP2(); renderP3(); setStep(0); window.scrollTo(0,0); }
+$("#check1").addEventListener("click", check1); $("#check2").addEventListener("click", check2); $("#check3").addEventListener("click", check3); $("#again").addEventListener("click", reset);
+reset();
+
+</script>
+</body>
+</html>
