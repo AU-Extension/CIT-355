@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player Comparison Radar</title>
+<meta name="description" content="CIT 355 Week 3 interactive: compare scouting targets with percentile radar charts and see why per-90 and per-36 numbers are fairer than totals.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:12px}
+.controls label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:8px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;color:var(--ink-2)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:8px 0 4px}
+.pbtn{text-align:left;border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 10px;cursor:pointer;font:inherit;font-size:13px;line-height:1.35}
+.pbtn b{display:block;font-size:14px}
+.pbtn[aria-pressed=true]{border-width:2px;padding:7px 9px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin:6px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+#radar{width:100%;max-width:520px;display:block;margin:0 auto}
+.reading p{margin:0 0 8px}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.calc label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.big2{font-size:24px;font-weight:700;color:var(--au-red-dark)}
+.note{font-size:13px;color:var(--muted)}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 3 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 3 · Explorer</span>
+    <h1>Player comparison radar</h1>
+    <p class="lede">Compare scouting targets for Biscayne Bay FC or the Breakers on one chart. Every spoke shows how a player ranks against the other targets at his position, so you can see strengths and weaknesses at a glance.</p>
+  </section>
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol><li>Choose soccer or basketball, then a position.</li><li>Pick two or three scouting targets from the list.</li><li>Read the radar and the plain-language summary on the right.</li><li>Check the table to see the real numbers behind each percentile.</li><li>Scroll down to see why rates (per 90 or per 36) compare players more fairly than totals.</li></ol>
+  </details>
+
+  <section class="card" style="margin-bottom:16px">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Sport">
+        <button type="button" id="sp-soccer" aria-pressed="true">Soccer</button>
+        <button type="button" id="sp-basketball" aria-pressed="false">Basketball</button>
+      </div>
+      <label>Position<select id="pos"></select></label>
+      <span class="note" id="poolnote"></span>
+    </div>
+    <div class="note">Pick up to 3 scouting targets to compare. Click a selected player again to remove them.</div>
+    <div class="plist" id="plist"></div>
+  </section>
+  <div class="grid two">
+    <section class="card">
+      <h2>Percentile radar</h2>
+      <div class="legend" id="legend"></div>
+      <svg id="radar" viewBox="0 0 560 440" role="img" aria-label="Radar chart comparing selected players"></svg>
+      <p class="note">Each spoke is a percentile: 100 means best among the scouting targets at this position, 50 means middle of the group. For injuries and turnovers, fewer is better, so a high score means few.</p>
+    </section>
+    <aside class="card reading">
+      <h2>What the chart says</h2>
+      <div id="reading"></div>
+    </aside>
+  </div>
+  <section class="card" style="margin-top:16px">
+    <h2>The numbers behind the chart</h2>
+    <div class="scroll-x"><table class="data" id="tbl"></table></div>
+  </section>
+  <section class="card" style="margin-top:16px" id="fair">
+    <h2>Why rates are fairer than totals</h2>
+    <div id="fairbody"></div>
+  </section>
+
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+
+const D={"soccer": [{"target_id": "ST01", "name": "Andre Rojas", "position": "Defender", "age": 29.0, "current_league": "MLS NEXT Pro", "minutes": 2063.0, "goals_per90": 0.05, "assists_per90": 0.05, "xg_per90": 0.06, "key_passes_per90": 1.91, "tackles_per90": 1.8, "pass_completion_pct": 91.0, "injury_days_last_2yrs": 10.0, "transfer_fee": 300000.0, "salary_ask": 200000.0}, {"target_id": "ST02", "name": "Iván Haddad", "position": "Forward", "age": 30.0, "current_league": "Colombian Primera", "minutes": 2155.0, "goals_per90": 0.34, "assists_per90": 0.26, "xg_per90": 0.39, "key_passes_per90": 1.33, "tackles_per90": 0.59, "pass_completion_pct": 81.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 150000.0, "salary_ask": 90000.0}, {"target_id": "ST03", "name": "Jonas Santos", "position": "Forward", "age": 20.0, "current_league": "MLS NEXT Pro", "minutes": 1470.0, "goals_per90": 0.34, "assists_per90": 0.1, "xg_per90": 0.41, "key_passes_per90": 1.17, "tackles_per90": 0.96, "pass_completion_pct": 78.0, "injury_days_last_2yrs": 10.0, "transfer_fee": 50000.0, "salary_ask": 350000.0}, {"target_id": "ST04", "name": "Felipe Delgado", "position": "Midfielder", "age": 18.0, "current_league": "Norwegian Eliteserien", "minutes": 2605.0, "goals_per90": 0.26, "assists_per90": 0.13, "xg_per90": 0.21, "key_passes_per90": 1.23, "tackles_per90": 2.94, "pass_completion_pct": 82.0, "injury_days_last_2yrs": 45.0, "transfer_fee": 800000.0, "salary_ask": 90000.0}, {"target_id": "ST05", "name": "Thiago Reyes", "position": "Forward", "age": 33.0, "current_league": "Brazilian Serie B", "minutes": 1359.0, "goals_per90": 0.54, "assists_per90": 0.09, "xg_per90": 0.58, "key_passes_per90": 1.82, "tackles_per90": 1.03, "pass_completion_pct": 75.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 0.0, "salary_ask": 160000.0}, {"target_id": "ST06", "name": "Isaiah Rojas", "position": "Forward", "age": 22.0, "current_league": "Belgian First Division B", "minutes": 2200.0, "goals_per90": 0.39, "assists_per90": 0.1, "xg_per90": 0.44, "key_passes_per90": 0.56, "tackles_per90": 1.06, "pass_completion_pct": 82.0, "injury_days_last_2yrs": 90.0, "transfer_fee": 300000.0, "salary_ask": 200000.0}, {"target_id": "ST07", "name": "Samuel Medina", "position": "Forward", "age": 19.0, "current_league": "Norwegian Eliteserien", "minutes": 942.0, "goals_per90": 0.65, "assists_per90": 0.18, "xg_per90": 0.52, "key_passes_per90": 2.14, "tackles_per90": 1.14, "pass_completion_pct": 77.0, "injury_days_last_2yrs": 45.0, "transfer_fee": 1200000.0, "salary_ask": 350000.0}, {"target_id": "ST08", "name": "Emeka Pereira", "position": "Midfielder", "age": 27.0, "current_league": "Colombian Primera", "minutes": 1000.0, "goals_per90": 0.13, "assists_per90": 0.12, "xg_per90": 0.12, "key_passes_per90": 0.36, "tackles_per90": 1.49, "pass_completion_pct": 72.0, "injury_days_last_2yrs": 90.0, "transfer_fee": 1200000.0, "salary_ask": 90000.0}, {"target_id": "ST09", "name": "Stefan Williams", "position": "Defender", "age": 26.0, "current_league": "Colombian Primera", "minutes": 935.0, "goals_per90": 0.06, "assists_per90": 0.03, "xg_per90": 0.05, "key_passes_per90": 1.2, "tackles_per90": 3.07, "pass_completion_pct": 76.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 800000.0, "salary_ask": 200000.0}, {"target_id": "ST10", "name": "Daniel Laurent", "position": "Defender", "age": 26.0, "current_league": "Colombian Primera", "minutes": 1711.0, "goals_per90": 0.03, "assists_per90": 0.06, "xg_per90": 0.03, "key_passes_per90": 0.98, "tackles_per90": 1.42, "pass_completion_pct": 72.0, "injury_days_last_2yrs": 21.0, "transfer_fee": 500000.0, "salary_ask": 200000.0}, {"target_id": "ST11", "name": "Jordan Adeyemi", "position": "Midfielder", "age": 29.0, "current_league": "Belgian First Division B", "minutes": 2820.0, "goals_per90": 0.17, "assists_per90": 0.17, "xg_per90": 0.16, "key_passes_per90": 1.11, "tackles_per90": 1.22, "pass_completion_pct": 80.0, "injury_days_last_2yrs": 45.0, "transfer_fee": 50000.0, "salary_ask": 120000.0}, {"target_id": "ST12", "name": "Gabriel Cruz", "position": "Forward", "age": 29.0, "current_league": "Norwegian Eliteserien", "minutes": 1718.0, "goals_per90": 0.33, "assists_per90": 0.3, "xg_per90": 0.27, "key_passes_per90": 1.08, "tackles_per90": 0.35, "pass_completion_pct": 74.0, "injury_days_last_2yrs": 10.0, "transfer_fee": 150000.0, "salary_ask": 90000.0}, {"target_id": "ST13", "name": "Andre Silva", "position": "Defender", "age": 20.0, "current_league": "Norwegian Eliteserien", "minutes": 2650.0, "goals_per90": 0.06, "assists_per90": 0.11, "xg_per90": 0.07, "key_passes_per90": 0.48, "tackles_per90": 1.78, "pass_completion_pct": 76.0, "injury_days_last_2yrs": 10.0, "transfer_fee": 300000.0, "salary_ask": 160000.0}, {"target_id": "ST14", "name": "Malik Haddad", "position": "Midfielder", "age": 21.0, "current_league": "Colombian Primera", "minutes": 2090.0, "goals_per90": 0.22, "assists_per90": 0.22, "xg_per90": 0.25, "key_passes_per90": 0.57, "tackles_per90": 2.22, "pass_completion_pct": 77.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 0.0, "salary_ask": 260000.0}, {"target_id": "ST15", "name": "Gabriel Ortega", "position": "Midfielder", "age": 29.0, "current_league": "Norwegian Eliteserien", "minutes": 2090.0, "goals_per90": 0.19, "assists_per90": 0.16, "xg_per90": 0.18, "key_passes_per90": 1.05, "tackles_per90": 2.76, "pass_completion_pct": 77.0, "injury_days_last_2yrs": 21.0, "transfer_fee": 50000.0, "salary_ask": 160000.0}, {"target_id": "ST16", "name": "Rafael Baptiste", "position": "Forward", "age": 29.0, "current_league": "Belgian First Division B", "minutes": 1766.0, "goals_per90": 0.5, "assists_per90": 0.27, "xg_per90": 0.42, "key_passes_per90": 2.42, "tackles_per90": 0.62, "pass_completion_pct": 83.0, "injury_days_last_2yrs": 90.0, "transfer_fee": 150000.0, "salary_ask": 160000.0}, {"target_id": "ST17", "name": "Bruno Petrov", "position": "Midfielder", "age": 26.0, "current_league": "Belgian First Division B", "minutes": 1892.0, "goals_per90": 0.11, "assists_per90": 0.25, "xg_per90": 0.09, "key_passes_per90": 2.57, "tackles_per90": 2.7, "pass_completion_pct": 82.0, "injury_days_last_2yrs": 90.0, "transfer_fee": 800000.0, "salary_ask": 260000.0}, {"target_id": "ST18", "name": "Malik Williams", "position": "Midfielder", "age": 18.0, "current_league": "MLS NEXT Pro", "minutes": 1621.0, "goals_per90": 0.23, "assists_per90": 0.27, "xg_per90": 0.24, "key_passes_per90": 0.97, "tackles_per90": 1.59, "pass_completion_pct": 75.0, "injury_days_last_2yrs": 10.0, "transfer_fee": 150000.0, "salary_ask": 350000.0}, {"target_id": "ST19", "name": "Adrián Miller", "position": "Forward", "age": 20.0, "current_league": "Belgian First Division B", "minutes": 2212.0, "goals_per90": 0.66, "assists_per90": 0.19, "xg_per90": 0.68, "key_passes_per90": 2.39, "tackles_per90": 0.42, "pass_completion_pct": 84.0, "injury_days_last_2yrs": 150.0, "transfer_fee": 0.0, "salary_ask": 90000.0}, {"target_id": "ST20", "name": "Isaiah Mendoza", "position": "Forward", "age": 28.0, "current_league": "USL Championship", "minutes": 2814.0, "goals_per90": 0.56, "assists_per90": 0.14, "xg_per90": 0.52, "key_passes_per90": 1.55, "tackles_per90": 1.05, "pass_completion_pct": 77.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 150000.0, "salary_ask": 160000.0}, {"target_id": "ST21", "name": "Malik Brown", "position": "Midfielder", "age": 26.0, "current_league": "Colombian Primera", "minutes": 1314.0, "goals_per90": 0.18, "assists_per90": 0.1, "xg_per90": 0.15, "key_passes_per90": 0.3, "tackles_per90": 0.81, "pass_completion_pct": 65.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 0.0, "salary_ask": 260000.0}, {"target_id": "ST22", "name": "Mateo Brown", "position": "Forward", "age": 27.0, "current_league": "Belgian First Division B", "minutes": 1077.0, "goals_per90": 0.71, "assists_per90": 0.2, "xg_per90": 0.8, "key_passes_per90": 1.51, "tackles_per90": 0.7, "pass_completion_pct": 79.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 300000.0, "salary_ask": 120000.0}, {"target_id": "ST23", "name": "Santiago Reyes", "position": "Midfielder", "age": 31.0, "current_league": "MLS NEXT Pro", "minutes": 1479.0, "goals_per90": 0.14, "assists_per90": 0.08, "xg_per90": 0.15, "key_passes_per90": 2.04, "tackles_per90": 0.63, "pass_completion_pct": 77.0, "injury_days_last_2yrs": 90.0, "transfer_fee": 800000.0, "salary_ask": 200000.0}, {"target_id": "ST24", "name": "Kenji Morales", "position": "Forward", "age": 30.0, "current_league": "USL Championship", "minutes": 1355.0, "goals_per90": 0.59, "assists_per90": 0.13, "xg_per90": 0.51, "key_passes_per90": 0.44, "tackles_per90": 0.85, "pass_completion_pct": 79.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 150000.0, "salary_ask": 90000.0}, {"target_id": "ST25", "name": "Yusuf Fonseca", "position": "Defender", "age": 32.0, "current_league": "Liga MX Expansion", "minutes": 981.0, "goals_per90": 0.08, "assists_per90": 0.04, "xg_per90": 0.07, "key_passes_per90": 2.48, "tackles_per90": 2.99, "pass_completion_pct": 87.0, "injury_days_last_2yrs": 45.0, "transfer_fee": 150000.0, "salary_ask": 160000.0}, {"target_id": "ST26", "name": "Jordan Silva", "position": "Midfielder", "age": 21.0, "current_league": "MLS NEXT Pro", "minutes": 1864.0, "goals_per90": 0.06, "assists_per90": 0.26, "xg_per90": 0.06, "key_passes_per90": 1.0, "tackles_per90": 2.62, "pass_completion_pct": 80.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 150000.0, "salary_ask": 200000.0}, {"target_id": "ST27", "name": "Jamal Pereira", "position": "Forward", "age": 24.0, "current_league": "Colombian Primera", "minutes": 2401.0, "goals_per90": 0.71, "assists_per90": 0.1, "xg_per90": 0.61, "key_passes_per90": 1.29, "tackles_per90": 0.43, "pass_completion_pct": 80.0, "injury_days_last_2yrs": 0.0, "transfer_fee": 800000.0, "salary_ask": 160000.0}, {"target_id": "ST28", "name": "Omar Delgado", "position": "Defender", "age": 31.0, "current_league": "Belgian First Division B", "minutes": 2027.0, "goals_per90": 0.04, "assists_per90": 0.04, "xg_per90": 0.04, "key_passes_per90": 2.28, "tackles_per90": 2.68, "pass_completion_pct": 75.0, "injury_days_last_2yrs": 21.0, "transfer_fee": 0.0, "salary_ask": 120000.0}, {"target_id": "ST29", "name": "Elijah Miller", "position": "Midfielder", "age": 32.0, "current_league": "Brazilian Serie B", "minutes": 2002.0, "goals_per90": 0.06, "assists_per90": 0.27, "xg_per90": 0.05, "key_passes_per90": 0.56, "tackles_per90": 1.01, "pass_completion_pct": 76.0, "injury_days_last_2yrs": 21.0, "transfer_fee": 1200000.0, "salary_ask": 160000.0}, {"target_id": "ST30", "name": "Isaiah Herrera", "position": "Midfielder", "age": 23.0, "current_league": "Brazilian Serie B", "minutes": 1084.0, "goals_per90": 0.24, "assists_per90": 0.11, "xg_per90": 0.27, "key_passes_per90": 1.07, "tackles_per90": 2.33, "pass_completion_pct": 83.0, "injury_days_last_2yrs": 21.0, "transfer_fee": 500000.0, "salary_ask": 120000.0}], "basketball": [{"target_id": "BT01", "name": "Thiago Charles", "position": "Guard", "age": 19.0, "current_league": "French LNB", "games_played": 24.0, "points_per36": 19.3, "rebounds_per36": 4.8, "assists_per36": 6.7, "fg_pct": 42.2, "three_pt_pct": 36.3, "turnovers_per36": 2.3, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 55000.0}, {"target_id": "BT02", "name": "Stefan Joseph", "position": "Center", "age": 20.0, "current_league": "Australian NBL", "games_played": 27.0, "points_per36": 13.7, "rebounds_per36": 4.0, "assists_per36": 1.3, "fg_pct": 54.6, "three_pt_pct": 19.7, "turnovers_per36": 3.6, "injury_games_missed_last_2yrs": 30.0, "salary_ask": 70000.0}, {"target_id": "BT03", "name": "Yusuf Vargas", "position": "Center", "age": 22.0, "current_league": "Spanish ACB", "games_played": 36.0, "points_per36": 19.4, "rebounds_per36": 12.3, "assists_per36": 1.9, "fg_pct": 58.1, "three_pt_pct": 25.6, "turnovers_per36": 2.6, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 70000.0}, {"target_id": "BT04", "name": "Omar Becker", "position": "Forward", "age": 24.0, "current_league": "NCAA Division I", "games_played": 26.0, "points_per36": 17.1, "rebounds_per36": 10.6, "assists_per36": 3.7, "fg_pct": 39.3, "three_pt_pct": 39.9, "turnovers_per36": 2.7, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 150000.0}, {"target_id": "BT05", "name": "Gabriel Johnson", "position": "Center", "age": 30.0, "current_league": "Puerto Rico BSN", "games_played": 27.0, "points_per36": 23.9, "rebounds_per36": 4.6, "assists_per36": 3.8, "fg_pct": 55.0, "three_pt_pct": 24.6, "turnovers_per36": 3.2, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 110000.0}, {"target_id": "BT06", "name": "Isaiah Santos", "position": "Center", "age": 19.0, "current_league": "NCAA Division I", "games_played": 30.0, "points_per36": 22.6, "rebounds_per36": 5.9, "assists_per36": 3.5, "fg_pct": 53.6, "three_pt_pct": 29.5, "turnovers_per36": 3.1, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 110000.0}, {"target_id": "BT07", "name": "Daniel Rojas", "position": "Center", "age": 32.0, "current_league": "French LNB", "games_played": 31.0, "points_per36": 11.8, "rebounds_per36": 8.1, "assists_per36": 3.5, "fg_pct": 52.9, "three_pt_pct": 24.3, "turnovers_per36": 3.0, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 70000.0}, {"target_id": "BT08", "name": "Omar Pierre", "position": "Forward", "age": 23.0, "current_league": "Spanish ACB", "games_played": 31.0, "points_per36": 13.3, "rebounds_per36": 10.3, "assists_per36": 3.7, "fg_pct": 49.8, "three_pt_pct": 32.8, "turnovers_per36": 1.7, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 150000.0}, {"target_id": "BT09", "name": "Joaquín Petrov", "position": "Forward", "age": 27.0, "current_league": "Puerto Rico BSN", "games_played": 24.0, "points_per36": 13.7, "rebounds_per36": 8.7, "assists_per36": 3.4, "fg_pct": 52.9, "three_pt_pct": 24.1, "turnovers_per36": 2.0, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 110000.0}, {"target_id": "BT10", "name": "Bryce Castillo", "position": "Center", "age": 22.0, "current_league": "Australian NBL", "games_played": 29.0, "points_per36": 20.9, "rebounds_per36": 4.0, "assists_per36": 3.9, "fg_pct": 59.2, "three_pt_pct": 22.5, "turnovers_per36": 2.0, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 55000.0}, {"target_id": "BT11", "name": "Josué Tanaka", "position": "Forward", "age": 25.0, "current_league": "Spanish ACB", "games_played": 34.0, "points_per36": 20.0, "rebounds_per36": 6.6, "assists_per36": 3.3, "fg_pct": 48.3, "three_pt_pct": 31.1, "turnovers_per36": 2.2, "injury_games_missed_last_2yrs": 9.0, "salary_ask": 90000.0}, {"target_id": "BT12", "name": "Ricardo Ibarra", "position": "Forward", "age": 29.0, "current_league": "French LNB", "games_played": 22.0, "points_per36": 19.0, "rebounds_per36": 5.2, "assists_per36": 3.4, "fg_pct": 47.0, "three_pt_pct": 38.0, "turnovers_per36": 1.8, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 90000.0}, {"target_id": "BT13", "name": "Marcus Costa", "position": "Guard", "age": 22.0, "current_league": "G League", "games_played": 31.0, "points_per36": 16.9, "rebounds_per36": 3.8, "assists_per36": 4.1, "fg_pct": 34.9, "three_pt_pct": 27.9, "turnovers_per36": 2.2, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 55000.0}, {"target_id": "BT14", "name": "Marcus Mendoza", "position": "Guard", "age": 25.0, "current_league": "Puerto Rico BSN", "games_played": 27.0, "points_per36": 18.5, "rebounds_per36": 5.8, "assists_per36": 4.9, "fg_pct": 37.5, "three_pt_pct": 41.6, "turnovers_per36": 2.0, "injury_games_missed_last_2yrs": 30.0, "salary_ask": 110000.0}, {"target_id": "BT15", "name": "Joaquín Medina", "position": "Forward", "age": 23.0, "current_league": "Spanish ACB", "games_played": 25.0, "points_per36": 23.4, "rebounds_per36": 12.1, "assists_per36": 2.6, "fg_pct": 44.2, "three_pt_pct": 29.3, "turnovers_per36": 3.7, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 90000.0}, {"target_id": "BT16", "name": "Aleksandar Reyes", "position": "Guard", "age": 25.0, "current_league": "Spanish ACB", "games_played": 20.0, "points_per36": 25.0, "rebounds_per36": 4.2, "assists_per36": 7.8, "fg_pct": 46.6, "three_pt_pct": 36.8, "turnovers_per36": 2.1, "injury_games_missed_last_2yrs": 30.0, "salary_ask": 150000.0}, {"target_id": "BT17", "name": "Hiro Medina", "position": "Center", "age": 23.0, "current_league": "Australian NBL", "games_played": 30.0, "points_per36": 13.0, "rebounds_per36": 10.4, "assists_per36": 2.9, "fg_pct": 48.0, "three_pt_pct": 20.9, "turnovers_per36": 1.5, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 55000.0}, {"target_id": "BT18", "name": "Marcus Laurent", "position": "Forward", "age": 26.0, "current_league": "G League", "games_played": 23.0, "points_per36": 20.2, "rebounds_per36": 9.7, "assists_per36": 1.8, "fg_pct": 44.9, "three_pt_pct": 44.9, "turnovers_per36": 1.4, "injury_games_missed_last_2yrs": 9.0, "salary_ask": 110000.0}, {"target_id": "BT19", "name": "Iván Ibarra", "position": "Forward", "age": 23.0, "current_league": "Mexican LNBP", "games_played": 28.0, "points_per36": 25.7, "rebounds_per36": 6.5, "assists_per36": 3.4, "fg_pct": 49.9, "three_pt_pct": 35.5, "turnovers_per36": 1.7, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 70000.0}, {"target_id": "BT20", "name": "Bruno Guerrero", "position": "Center", "age": 31.0, "current_league": "Spanish ACB", "games_played": 24.0, "points_per36": 20.7, "rebounds_per36": 11.3, "assists_per36": 3.7, "fg_pct": 56.0, "three_pt_pct": 28.1, "turnovers_per36": 3.0, "injury_games_missed_last_2yrs": 30.0, "salary_ask": 110000.0}, {"target_id": "BT21", "name": "Cameron Haddad", "position": "Center", "age": 19.0, "current_league": "Mexican LNBP", "games_played": 23.0, "points_per36": 18.3, "rebounds_per36": 11.8, "assists_per36": 1.7, "fg_pct": 55.5, "three_pt_pct": 29.4, "turnovers_per36": 3.4, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 55000.0}, {"target_id": "BT22", "name": "Rafael Alvarez", "position": "Center", "age": 20.0, "current_league": "Australian NBL", "games_played": 32.0, "points_per36": 10.6, "rebounds_per36": 10.1, "assists_per36": 2.0, "fg_pct": 57.8, "three_pt_pct": 22.7, "turnovers_per36": 3.1, "injury_games_missed_last_2yrs": 0.0, "salary_ask": 70000.0}, {"target_id": "BT23", "name": "Bruno Castillo", "position": "Forward", "age": 20.0, "current_league": "NCAA Division I", "games_played": 22.0, "points_per36": 20.6, "rebounds_per36": 5.8, "assists_per36": 3.2, "fg_pct": 46.7, "three_pt_pct": 38.1, "turnovers_per36": 2.0, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 200000.0}, {"target_id": "BT24", "name": "Carlos Mendoza", "position": "Center", "age": 19.0, "current_league": "Mexican LNBP", "games_played": 23.0, "points_per36": 21.1, "rebounds_per36": 8.0, "assists_per36": 1.8, "fg_pct": 53.5, "three_pt_pct": 28.3, "turnovers_per36": 2.4, "injury_games_missed_last_2yrs": 18.0, "salary_ask": 55000.0}], "roster": [{"name": "Andre Novak", "position": "Guard", "ppg": 13.0, "mpg": 29.8, "rpg": 3.3}, {"name": "Kofi Rocha", "position": "Guard", "ppg": 5.5, "mpg": 15.1, "rpg": 2.1}, {"name": "Hiro Pierre", "position": "Guard", "ppg": 5.3, "mpg": 9.5, "rpg": 0.9}, {"name": "Josué Thompson", "position": "Guard", "ppg": 8.0, "mpg": 14.1, "rpg": 1.5}, {"name": "Iván Thompson", "position": "Guard", "ppg": 17.7, "mpg": 31.9, "rpg": 2.9}, {"name": "Carlos Costa", "position": "Forward", "ppg": 17.0, "mpg": 31.6, "rpg": 5.2}, {"name": "Pierre Joseph", "position": "Forward", "ppg": 8.0, "mpg": 14.4, "rpg": 3.6}, {"name": "Isaiah Alvarez", "position": "Forward", "ppg": 3.5, "mpg": 12.9, "rpg": 3.4}, {"name": "Andrés Pereira", "position": "Forward", "ppg": 13.0, "mpg": 25.5, "rpg": 6.8}, {"name": "Hiro Charles", "position": "Forward", "ppg": 16.1, "mpg": 31.6, "rpg": 6.1}, {"name": "Mateo Guerrero", "position": "Center", "ppg": 5.9, "mpg": 18.6, "rpg": 5.6}, {"name": "Diego Ortega", "position": "Center", "ppg": 11.6, "mpg": 28.0, "rpg": 11.4}, {"name": "Wilson Thompson", "position": "Center", "ppg": 8.3, "mpg": 32.0, "rpg": 8.8}]};
+const AX={
+ soccer:{
+  Forward:[["goals_per90","Goals per 90"],["xg_per90","Expected goals per 90"],["assists_per90","Assists per 90"],["key_passes_per90","Key passes per 90"],["pass_completion_pct","Pass completion %"],["injury_days_last_2yrs","Availability",1]],
+  Midfielder:[["tackles_per90","Tackles per 90"],["key_passes_per90","Key passes per 90"],["assists_per90","Assists per 90"],["pass_completion_pct","Pass completion %"],["goals_per90","Goals per 90"],["injury_days_last_2yrs","Availability",1]],
+  Defender:[["tackles_per90","Tackles per 90"],["pass_completion_pct","Pass completion %"],["key_passes_per90","Key passes per 90"],["assists_per90","Assists per 90"],["injury_days_last_2yrs","Availability",1]]
+ },
+ basketball:{
+  Guard:[["points_per36","Points per 36"],["assists_per36","Assists per 36"],["three_pt_pct","3-point %"],["fg_pct","Field goal %"],["turnovers_per36","Ball security",1],["injury_games_missed_last_2yrs","Availability",1]],
+  Forward:[["points_per36","Points per 36"],["rebounds_per36","Rebounds per 36"],["three_pt_pct","3-point %"],["fg_pct","Field goal %"],["turnovers_per36","Ball security",1],["injury_games_missed_last_2yrs","Availability",1]],
+  Center:[["points_per36","Points per 36"],["rebounds_per36","Rebounds per 36"],["fg_pct","Field goal %"],["assists_per36","Assists per 36"],["turnovers_per36","Ball security",1],["injury_games_missed_last_2yrs","Availability",1]]
+ }};
+const COLORS=["#2563EB","#E1141E","#B45309"];
+let sport="soccer", pos="Forward", sel=[];
+const $=id=>document.getElementById(id);
+function pool(){return D[sport].filter(p=>p.position===pos);}
+function pct(arr,v,inv){ // share of the group this player beats, ties count half
+  const a=arr.map(x=>inv?-x:x), x=inv?-v:v, n=a.length; if(n<2) return 50;
+  const below=a.filter(y=>y<x).length, eq=a.filter(y=>y===x).length-1;
+  return Math.round(100*(below+0.5*eq)/(n-1));
+}
+function ord(n){const s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+function money(v){return "$"+Math.round(v).toLocaleString("en-US");}
+function setSport(s){
+  sport=s; $("sp-soccer").setAttribute("aria-pressed",s==="soccer"); $("sp-basketball").setAttribute("aria-pressed",s==="basketball");
+  const ps=Object.keys(AX[s]); $("pos").innerHTML=ps.map(p=>`<option>${p}</option>`).join(""); pos=ps[0]; $("pos").value=pos; defaultSel(); render();
+}
+function defaultSel(){ sel=pool().slice(0,2).map(p=>p.target_id); }
+function renderList(){
+  const P=pool(); $("poolnote").textContent=P.length+" "+pos.toLowerCase()+"s in the scouting file";
+  $("plist").innerHTML=P.map(p=>{const i=sel.indexOf(p.target_id);const on=i>=0;
+    const sub=sport==="soccer"?`${p.age} yrs · ${p.minutes.toLocaleString()} min · ${p.current_league}`:`${p.age} yrs · ${p.games_played} games · ${p.current_league}`;
+    return `<button type="button" class="pbtn" data-id="${p.target_id}" aria-pressed="${on}" style="${on?'border-color:'+COLORS[i]:''}"><b>${p.name}</b>${sub}</button>`}).join("");
+  document.querySelectorAll(".pbtn").forEach(b=>b.onclick=()=>{const id=b.dataset.id;const i=sel.indexOf(id);
+    if(i>=0) sel.splice(i,1); else { if(sel.length>=3) sel.shift(); sel.push(id);} render();});
+}
+function scores(p){const P=pool();return AX[sport][pos].map(([k,l,inv])=>pct(P.map(q=>q[k]),p[k],inv));}
+function renderRadar(){
+  const axes=AX[sport][pos], n=axes.length, cx=280, cy=215, R=135; let s="";
+  for(const ring of [25,50,75,100]){let pts=[];for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;pts.push([cx+R*ring/100*Math.cos(a),cy+R*ring/100*Math.sin(a)]);}
+    s+=`<polygon points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#E3E6EB"/>`;
+    s+=`<text x="${cx+3}" y="${cy-R*ring/100+11}" font-size="10" fill="#9CA3AF">${ring}</text>`;}
+  axes.forEach(([k,l],i)=>{const a=-Math.PI/2+i*2*Math.PI/n,x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);
+    s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#E3E6EB"/>`;
+    const lx=cx+(R+22)*Math.cos(a), ly=cy+(R+22)*Math.sin(a); const anchor=Math.abs(Math.cos(a))<0.2?"middle":(Math.cos(a)>0?"start":"end");
+    const words=l.split(" ");let lines=[l];if(l.length>12&&words.length>1){const h=Math.floor(words.length/2);lines=[words.slice(0,h).join(" "),words.slice(h).join(" ")];}
+    const y0=ly+4-(lines.length-1)*7;s+=`<text x="${lx}" y="${y0}" font-size="13" text-anchor="${anchor}" fill="#3B4250" font-weight="600">${lines.map((t,k)=>`<tspan x="${lx}" dy="${k?15:0}">${t}</tspan>`).join("")}</text>`;});
+  const players=sel.map(id=>pool().find(p=>p.target_id===id)).filter(Boolean);
+  players.forEach((p,j)=>{const sc=scores(p);const pts=sc.map((v,i)=>{const a=-Math.PI/2+i*2*Math.PI/n,r=R*Math.max(v,3)/100;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];});
+    s+=`<polygon class="poly" points="${pts.map(p=>p.join(",")).join(" ")}" fill="${COLORS[j]}" fill-opacity="0.15" stroke="${COLORS[j]}" stroke-width="2.5"/>`;
+    pts.forEach(q=>s+=`<circle cx="${q[0]}" cy="${q[1]}" r="3.5" fill="${COLORS[j]}"/>`);});
+  $("radar").innerHTML=s;
+  if(window.gsap){gsap.from("#radar .poly",{scale:0.2,transformOrigin:"280px 215px",opacity:0,duration:0.5,stagger:0.08});}
+  $("legend").innerHTML=players.map((p,j)=>`<span><i class="dot" style="background:${COLORS[j]}"></i>${p.name}</span>`).join("")||'<span class="note">Pick a player above.</span>';
+}
+function renderReading(){
+  const axes=AX[sport][pos]; const players=sel.map(id=>pool().find(p=>p.target_id===id)).filter(Boolean);
+  if(!players.length){$("reading").innerHTML='<p class="note">Select at least one player.</p>';return;}
+  let h="";
+  players.forEach((p,j)=>{const sc=scores(p);const strong=axes.filter((a,i)=>sc[i]>=75).map(a=>a[1].toLowerCase());const weak=axes.filter((a,i)=>sc[i]<=25).map(a=>a[1].toLowerCase());
+    const avg=Math.round(sc.reduce((a,b)=>a+b,0)/sc.length);
+    const cost=sport==="soccer"?`Transfer fee ${money(p.transfer_fee)}, salary ask ${money(p.salary_ask)}.`:`Salary ask ${money(p.salary_ask)}.`;
+    h+=`<p><b style="color:${COLORS[j]}">${p.name}</b> (${p.age}, ${p.current_league}): average percentile ${avg}. `+
+      (strong.length?`Top quarter of the group for ${strong.join(", ")}. `:"No category in the top quarter. ")+
+      (weak.length?`Bottom quarter for ${weak.join(", ")}. `:"")+cost+`</p>`;});
+  h+=`<p class="note">A radar shows the shape of a player, not the whole story. Combine it with video, the coach's needs, age, and cost before deciding.</p>`;
+  $("reading").innerHTML=h;
+}
+function renderTable(){
+  const axes=AX[sport][pos]; const players=sel.map(id=>pool().find(p=>p.target_id===id)).filter(Boolean);
+  if(!players.length){$("tbl").innerHTML="";return;}
+  let h="<tr><th>Measure</th>"+players.map((p,j)=>`<th style="color:${COLORS[j]}">${p.name}</th>`).join("")+"</tr>";
+  axes.forEach(([k,l,inv],i)=>{h+=`<tr><td>${l}${inv?' <span class="note">('+(k.indexOf("injury")===0?"injury "+(sport==="soccer"?"days":"games missed"):"turnovers per 36")+', fewer is better)</span>':''}</td>`+players.map(p=>`<td>${p[k]} <span class="pill">${ord(scores(p)[i])}</span></td>`).join("")+"</tr>";});
+  $("tbl").innerHTML=h;
+}
+function renderFair(){
+  if(sport==="soccer"){
+    const players=sel.map(id=>pool().find(p=>p.target_id===id)).filter(Boolean);
+    let rows=players.map((p,j)=>`<tr><td style="color:${COLORS[j]};font-weight:600">${p.name}</td><td>${p.minutes.toLocaleString()}</td><td>${p.goals_per90}</td><td>${(p.goals_per90*p.minutes/90).toFixed(1)}</td></tr>`).join("");
+    $("fairbody").innerHTML=`<p>Players get different amounts of playing time. A season total rewards whoever played the most minutes. A <b>per 90</b> number (per full match) shows what a player produces in the same amount of time, so it compares players fairly.</p>
+    <p>Season goals = goals per 90 × minutes ÷ 90.</p>
+    <div class="scroll-x"><table class="data"><tr><th>Player</th><th>Minutes</th><th>Goals per 90</th><th>Season goals (estimated)</th></tr>${rows||'<tr><td colspan="4">Select players above.</td></tr>'}</table></div>
+    <p style="margin-top:10px"><button class="btn" id="ex">Show the classic example</button></p><div id="exout"></div>`;
+    $("ex").onclick=()=>{pos="Forward";$("pos").value="Forward";sel=["ST22","ST20"];render();
+      $("exout").innerHTML=`<div class="feedback info">Isaiah Mendoza scored about 17.5 goals in 2,814 minutes. Mateo Brown scored about 8.5 in only 1,077 minutes. On totals, Mendoza looks twice as good. Per 90, Brown scores 0.71 and Mendoza 0.56, so Brown is more productive when he plays. But Brown's smaller sample (about 12 full matches) makes his rate less certain: that is a question for the scouts.</div>`;};
+  } else {
+    const R=D.roster; const opts=R.map((p,i)=>`<option value="${i}">${p.name} (${p.position})</option>`).join("");
+    $("fairbody").innerHTML=`<p>Basketball players play very different minutes per game. A bench player who plays 14 minutes cannot score like a starter who plays 32. A <b>per 36</b> number estimates what a player would produce in 36 minutes, a typical starter's night, so players can be compared fairly. The scouting file already shows per-36 numbers. Try the calculator with the current Breakers roster.</p>
+    <p>Points per 36 = points per game × 36 ÷ minutes per game.</p>
+    <div class="calc"><label>Breakers player<select id="rp">${opts}</select></label><div><div class="note">Points per game</div><div class="big2" id="ppg"></div></div><div><div class="note">Minutes per game</div><div class="big2" id="mpg"></div></div><div><div class="note">Points per 36</div><div class="big2" id="p36"></div></div></div>
+    <p><button class="btn" id="ex">Show the classic example</button></p><div id="exout"></div>`;
+    const up=()=>{const p=R[+$("rp").value];$("ppg").textContent=p.ppg;$("mpg").textContent=p.mpg;$("p36").textContent=(p.ppg*36/p.mpg).toFixed(1);};
+    $("rp").onchange=up; up();
+    $("ex").onclick=()=>{$("exout").innerHTML=`<div class="feedback info">Andre Novak scores 13.0 points per game in 29.8 minutes: 15.7 per 36. Josué Thompson scores only 8.0 per game, but in 14.1 minutes: 20.4 per 36. Per minute, the bench player scores more. Whether he can keep that up with more minutes is the coach's question.</div>`;};
+  }
+}
+function render(){renderList();renderRadar();renderReading();renderTable();renderFair();}
+$("sp-soccer").onclick=()=>setSport("soccer"); $("sp-basketball").onclick=()=>setSport("basketball");
+$("pos").onchange=e=>{pos=e.target.value;defaultSel();render();};
+setSport("soccer");
+
+</script>
+</body>
+</html>

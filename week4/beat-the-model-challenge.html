@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat the Model</title>
+<meta name="description" content="CIT 355 Week 4 challenge: forecast attendance for ten Biscayne Bay home games and compare your forecasts with a simple data model.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.gcard{display:grid;gap:16px}
+@media(min-width:860px){.gcard{grid-template-columns:1fr 1fr}}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:15px;margin:8px 0}
+.facts dt{color:var(--muted)} .facts dd{margin:0;font-weight:600}
+.inp{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.inp input[type=range]{flex:1;min-width:180px;accent-color:var(--au-red)}
+.inp input[type=number]{width:110px}
+.bars{margin-top:8px}
+.bar{display:grid;grid-template-columns:90px 1fr 70px;align-items:center;gap:8px;margin:6px 0;font-size:14px}
+.bar .track{background:#EEF0F3;border-radius:6px;height:18px;position:relative;overflow:hidden}
+.bar .fill{height:100%;border-radius:6px;width:0}
+.prog{display:flex;gap:4px;flex-wrap:wrap}
+.prog span{width:22px;height:8px;border-radius:4px;background:#E3E6EB}
+.prog span.done{background:var(--ink)} .prog span.on{background:var(--au-red)}
+.calcline{font-family:var(--mono);font-size:13px;background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:8px;white-space:pre-wrap}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 4 · Interactive B</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 4 · Challenge</span>
+    <h1>Beat the model challenge</h1>
+    <p class="lede">Ten home games are coming up for Biscayne Bay FC and the Breakers. Read the facts and forecast the crowd, then see whether your judgment beats a simple model built from earlier games.</p>
+  </section>
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol><li>Read the facts for each game: opponent, day, promotion, weather, and price.</li><li>Set your attendance forecast with the slider or type a number.</li><li>Lock it in to see the model forecast and the actual crowd.</li><li>Within 5% of the actual crowd earns 10 points, within 10% earns 7, within 15% earns 4, otherwise 1.</li><li>After ten games, see who forecast better and which factors mattered most.</li></ol>
+  </details>
+
+  <section class="card" style="margin-bottom:16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+    <div><b id="glabel"></b><div class="prog" id="prog" style="margin-top:6px"></div></div>
+    <div class="score">You <span class="big" id="you">0</span> <span class="note">vs</span> Model <span class="big" id="mod" style="color:var(--ink-2)">0</span></div>
+  </section>
+  <section class="card" id="play">
+    <div class="gcard">
+      <div>
+        <span class="pill" id="gsport"></span>
+        <h2 id="gtitle" style="margin-top:8px"></h2>
+        <dl class="facts" id="facts"></dl>
+        <p class="note" id="hint"></p>
+        <div class="inp"><label for="rng" style="font-weight:600">Your attendance forecast</label></div>
+        <div class="inp"><input type="range" id="rng" step="50"><input type="number" id="num" step="50" aria-label="Forecast number"></div>
+        <button class="btn primary" id="lock">Lock in my forecast</button>
+      </div>
+      <div id="result" hidden>
+        <h3>Result</h3>
+        <div class="bars" id="bars"></div>
+        <div id="verdict"></div>
+        <div class="calcline" id="calc"></div>
+        <p style="margin-top:12px"><button class="btn" id="next">Next game</button></p>
+      </div>
+    </div>
+  </section>
+  <section class="card" id="final" hidden>
+    <h2>Final results</h2>
+    <div id="fsum"></div>
+    <h3 style="margin-top:14px">What the model learned from earlier home games</h3>
+    <div class="scroll-x"><table class="data" id="coef"></table></div>
+    <p class="note">The model is a simple average-based formula: start from a typical crowd, then add or subtract what each factor was worth in earlier home games. It ignores things it cannot see (a star player's return, a holiday weekend, a big local event, a viral promotion), which is where a manager's knowledge still matters.</p>
+    <p><button class="btn primary" id="again">Play again</button></p>
+  </section>
+
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+
+const D={"games": [{"sport": "soccer", "team": "Biscayne Bay FC", "id": "S26", "date": "2026-08-29", "day": "Saturday", "time": "7:30 PM", "opp": "Jacksonville Surf", "riv": false, "promo": "None", "weather": "Rain", "price": 32.0, "actual": 7958, "cap": 12000, "f": [true, false, false, true, true]}, {"sport": "soccer", "team": "Biscayne Bay FC", "id": "S28", "date": "2026-09-16", "day": "Wednesday", "time": "7:30 PM", "opp": "Memphis Blues SC", "riv": false, "promo": "None", "weather": "Clear night", "price": 38.0, "actual": 6990, "cap": 12000, "f": [true, false, false, false, false]}, {"sport": "soccer", "team": "Biscayne Bay FC", "id": "S30", "date": "2026-09-26", "day": "Saturday", "time": "7:30 PM", "opp": "Birmingham Iron", "riv": false, "promo": "Fan giveaway", "weather": "Clear night", "price": 32.0, "actual": 9411, "cap": 12000, "f": [true, false, true, true, false]}, {"sport": "soccer", "team": "Biscayne Bay FC", "id": "S32", "date": "2026-10-11", "day": "Sunday", "time": "5:00 PM", "opp": "Richmond Rebels", "riv": false, "promo": "Heritage night", "weather": "Clear night", "price": 38.0, "actual": 7894, "cap": 12000, "f": [true, false, true, false, false]}, {"sport": "soccer", "team": "Biscayne Bay FC", "id": "S34", "date": "2026-10-23", "day": "Friday", "time": "7:30 PM", "opp": "Sarasota Keys FC", "riv": false, "promo": "None", "weather": "Sunny", "price": 38.0, "actual": 7599, "cap": 12000, "f": [true, false, false, true, false]}, {"sport": "basketball", "team": "Biscayne Bay Breakers", "id": "B31", "date": "2027-02-20", "day": "Saturday", "time": "7:30 PM", "opp": "Orlando Comets", "riv": true, "promo": "None", "weather": "Indoor arena", "price": 30.0, "actual": 5211, "cap": 6000, "f": [true, true, false, false]}, {"sport": "basketball", "team": "Biscayne Bay Breakers", "id": "B33", "date": "2027-02-27", "day": "Saturday", "time": "7:30 PM", "opp": "Jacksonville Jets", "riv": false, "promo": "None", "weather": "Indoor arena", "price": 34.0, "actual": 4092, "cap": 6000, "f": [true, false, false, false]}, {"sport": "basketball", "team": "Biscayne Bay Breakers", "id": "B35", "date": "2027-03-05", "day": "Friday", "time": "7:30 PM", "opp": "Charlotte Hornet Hall", "riv": false, "promo": "None", "weather": "Indoor arena", "price": 27.0, "actual": 5033, "cap": 6000, "f": [true, false, false, true]}, {"sport": "basketball", "team": "Biscayne Bay Breakers", "id": "B37", "date": "2027-03-13", "day": "Saturday", "time": "7:30 PM", "opp": "Birmingham Steel", "riv": false, "promo": "Family pack", "weather": "Indoor arena", "price": 24.0, "actual": 6000, "cap": 6000, "f": [true, false, true, false]}, {"sport": "basketball", "team": "Biscayne Bay Breakers", "id": "B39", "date": "2027-03-19", "day": "Friday", "time": "7:30 PM", "opp": "Memphis Kings", "riv": false, "promo": "None", "weather": "Indoor arena", "price": 34.0, "actual": 4925, "cap": 6000, "f": [true, false, false, true]}], "cS": [7368, 881, 952, 914, -1692], "cB": [4481, 649, 403, 301], "avgS": 8806, "avgB": 4879};
+const $=id=>document.getElementById(id);
+const pts=e=>e<=5?10:e<=10?7:e<=15?4:1;
+let i=0, you=0, mod=0, rows=[];
+function model(g){const c=g.sport==="soccer"?D.cS:D.cB;return g.f.reduce((s,on,k)=>s+(on?c[k]:0),0);}
+function labelsFor(g){return g.sport==="soccer"?["Starting point","Rivalry","Promotion","Weekend (Fri/Sat)","Rain"]:["Starting point","Rivalry","Promotion","Friday night"];}
+function prog(){$("prog").innerHTML=D.games.map((g,k)=>`<span class="${k<i?'done':(k===i?'on':'')}"></span>`).join("");}
+function show(){
+  const g=D.games[i]; prog(); $("glabel").textContent=`Game ${i+1} of ${D.games.length}`;
+  $("gsport").textContent=g.team; $("gtitle").textContent=`${g.team} vs ${g.opp}`;
+  const f=[["Date",`${g.day}, ${g.date}`],["Start time",g.time],["Opponent",g.opp+(g.riv?" (rivalry)":"")],["Promotion",g.promo==="None"?"None":g.promo],["Weather",g.weather],["Average ticket price","$"+g.price],["Capacity",g.cap.toLocaleString()]];
+  $("facts").innerHTML=f.map(x=>`<dt>${x[0]}</dt><dd>${x[1]}</dd>`).join("");
+  const avg=g.sport==="soccer"?D.avgS:D.avgB;
+  $("hint").textContent=`Earlier home ${g.sport==="soccer"?"matches":"games"} this season averaged about ${avg.toLocaleString()} fans.`;
+  const lo=g.sport==="soccer"?4000:2000; $("rng").min=lo; $("rng").max=g.cap; $("num").min=lo; $("num").max=g.cap;
+  $("rng").value=avg; $("num").value=avg; $("result").hidden=true; $("lock").disabled=false; $("rng").disabled=false; $("num").disabled=false;
+}
+$("rng").oninput=()=>$("num").value=$("rng").value; $("num").oninput=()=>$("rng").value=$("num").value;
+function lock(){
+  const g=D.games[i]; let guess=Math.round(+$("num").value); const lo=+$("num").min; guess=Math.max(lo,Math.min(g.cap,guess||lo)); $("num").value=guess;
+  const m=model(g), a=g.actual, ey=Math.abs(guess-a)/a*100, em=Math.abs(m-a)/a*100, py=pts(ey), pm=pts(em);
+  you+=py; mod+=pm; $("you").textContent=you; $("mod").textContent=mod; rows.push({g,guess,m,a,ey,em,py,pm});
+  const mx=g.cap; const bar=(l,v,c)=>`<div class="bar"><span>${l}</span><div class="track"><div class="fill" style="background:${c}" data-w="${v/mx*100}"></div></div><b>${v.toLocaleString()}</b></div>`;
+  $("bars").innerHTML=bar("You",guess,"#2563EB")+bar("Model",m,"#6B7280")+bar("Actual",a,"#E1141E");
+  document.querySelectorAll(".fill").forEach(el=>{if(window.gsap) gsap.to(el,{width:el.dataset.w+"%",duration:0.6}); else el.style.width=el.dataset.w+"%";});
+  const better=ey<em?"You beat the model on this game.":ey>em?"The model was closer this time.":"You and the model tied.";
+  $("verdict").innerHTML=`<div class="feedback ${py>=7?'ok':'info'}">You were off by ${ey.toFixed(1)}% (+${py} points). The model was off by ${em.toFixed(1)}% (+${pm}). ${better}</div>`;
+  const L=labelsFor(g), c=g.sport==="soccer"?D.cS:D.cB; let lines=L.map((l,k)=>g.f[k]?`${k?(c[k]>=0?"+ ":"- "):"  "}${l.padEnd(18)} ${Math.abs(c[k]).toLocaleString()}`:null).filter(Boolean);
+  $("calc").textContent="How the model got its number:\n"+lines.join("\n")+`\n= ${m.toLocaleString()} fans`;
+  $("result").hidden=false; $("lock").disabled=true; $("rng").disabled=true; $("num").disabled=true;
+  $("next").textContent=i<D.games.length-1?"Next game":"See final results";
+}
+function next(){i++; if(i>=D.games.length){finish();return;} show();}
+function finish(){
+  $("play").hidden=true; $("final").hidden=false; prog();
+  const ay=rows.reduce((s,r)=>s+r.ey,0)/rows.length, am=rows.reduce((s,r)=>s+r.em,0)/rows.length;
+  $("fsum").innerHTML=`<div class="score">Your score <span class="big">${you}</span><span class="note">/ 100</span> · Model <span class="big" style="color:var(--ink-2)">${mod}</span></div>
+  <p>Your average miss: <b>${ay.toFixed(1)}%</b>. The model's average miss: <b>${am.toFixed(1)}%</b>. ${you>mod?"You beat the model. Your knowledge of the games added something the formula could not see.":you===mod?"A tie: you and the model read the games equally well.":"The model won. Simple averages are hard to beat, which is why clubs use them as a starting point and then adjust with judgment."}</p>
+  <div class="scroll-x"><table class="data"><tr><th>Game</th><th>You</th><th>Model</th><th>Actual</th><th>Your miss</th><th>Model miss</th></tr>${rows.map(r=>`<tr><td>${r.g.team.replace("Biscayne Bay ","")} vs ${r.g.opp}</td><td>${r.guess.toLocaleString()}</td><td>${r.m.toLocaleString()}</td><td>${r.a.toLocaleString()}</td><td>${r.ey.toFixed(1)}%</td><td>${r.em.toFixed(1)}%</td></tr>`).join("")}</table></div>
+  <p class="note">Notice the two games where the model missed badly: a rainy soccer match that drew more fans than rain usually allows, and a Breakers Family pack night that sold out. Every forecast needs a range, because single games always surprise.</p>`;
+  const s=["Starting point","Rivalry","Promotion","Weekend (Fri/Sat)","Rain"], b=["Starting point","Rivalry","Promotion","Friday night"];
+  $("coef").innerHTML=`<tr><th>Biscayne Bay FC factor</th><th>Fans</th><th>Breakers factor</th><th>Fans</th></tr>`+s.map((l,k)=>`<tr><td>${l}</td><td>${(k&&D.cS[k]>0?"+":"")+D.cS[k].toLocaleString()}</td><td>${b[k]||""}</td><td>${b[k]?(k&&D.cB[k]>0?"+":"")+D.cB[k].toLocaleString():""}</td></tr>`).join("");
+}
+$("lock").onclick=lock; $("next").onclick=next;
+$("again").onclick=()=>{i=0;you=0;mod=0;rows=[];$("you").textContent=0;$("mod").textContent=0;$("final").hidden=true;$("play").hidden=false;show();};
+show();
+
+</script>
+</body>
+</html>

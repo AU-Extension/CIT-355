@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Correlation vs Causation</title>
+<meta name="description" content="CIT 355 Week 4 interactive: explore real Biscayne Bay attendance data and discover how hidden factors create misleading correlations.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+#plot{width:100%;display:block}
+.rbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.rbox div{background:var(--bg);border-radius:10px;padding:10px 12px}
+.rbox .v{font-size:26px;font-weight:700;color:var(--au-red-dark)}
+.rbox .l{font-size:13px;color:var(--muted)}
+.meter{height:12px;border-radius:6px;background:linear-gradient(90deg,#B91C1C,#E5E7EB 50%,#15803D);position:relative;margin:6px 0 2px}
+.meter i{position:absolute;top:-4px;width:4px;height:20px;background:var(--ink);border-radius:2px;transform:translateX(-2px)}
+.mlab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 8px;border-radius:6px;white-space:nowrap}
+.plotwrap{position:relative}
+.q{border-top:1px solid var(--line);padding:12px 0}
+.q:first-child{border-top:0}
+.opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.opts button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font:inherit;font-size:14px;cursor:pointer}
+.opts button.right{border-color:#15803D;background:#E7F6EC}
+.opts button.wrong{border-color:#B91C1C;background:#FDECEC}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 4 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 4 · Explorer</span>
+    <h1>Correlation vs causation explorer</h1>
+    <p class="lede">Look at real Biscayne Bay attendance data and decide what really drives crowds. Then reveal the hidden factor and see how a simple chart can mislead a manager.</p>
+  </section>
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol><li>Pick one of the three questions at the top.</li><li>Read the chart and the correlation number. Make your own conclusion first.</li><li>Click "Reveal the hidden factor" and compare.</li><li>Hover over or tab to any dot to see the game details.</li><li>Finish with the five-question check at the bottom.</li></ol>
+  </details>
+
+  <section class="card">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-v="0">Soccer: ticket price and crowds</button>
+      <button role="tab" aria-selected="false" data-v="1">Basketball: ticket price and crowds</button>
+      <button role="tab" aria-selected="false" data-v="2">Soccer: recent wins and crowds</button>
+    </div>
+    <div class="grid two">
+      <div>
+        <div class="plotwrap"><svg id="plot" viewBox="0 0 620 400" role="img" aria-label="Scatter plot"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="legend" id="legend"></div>
+        <p style="margin:10px 0 0"><button class="btn primary" id="reveal">Reveal the hidden factor</button></p>
+      </div>
+      <div>
+        <h2 id="vtitle"></h2>
+        <p id="vq"></p>
+        <div class="rbox"><div><div class="l">Correlation, all home games</div><div class="v" id="rall"></div><div class="l" id="rallw"></div></div><div id="r2box" hidden><div class="l" id="r2l"></div><div class="v" id="r2"></div><div class="l" id="r2w"></div></div></div>
+        <div class="meter"><i id="mk"></i></div><div class="mlab"><span>-1 move opposite</span><span>0 no link</span><span>+1 move together</span></div>
+        <div id="story" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+  <section class="card" style="margin-top:16px">
+    <h2>What is a correlation?</h2>
+    <p>A correlation is a number from -1 to +1 that shows how closely two things move together. Close to +1: when one goes up, the other usually goes up. Close to -1: when one goes up, the other usually goes down. Close to 0: no clear pattern. A correlation never proves that one thing <i>causes</i> the other. A third factor can push both at the same time, and managers who miss it make expensive decisions.</p>
+  </section>
+  <section class="card" style="margin-top:16px">
+    <h2>Check your understanding</h2>
+    <div id="quiz"></div>
+    <div class="score" style="margin-top:8px">Quiz score <span class="big" id="qs">0</span><span class="note" id="qn"></span></div>
+  </section>
+
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+
+<script>
+
+const D={"S": [{"id": "S01", "date": "2026-03-07", "opp": "Orlando Pines SC", "price": 50.0, "att": 9631, "riv": true, "rain": false, "weather": "Sunny", "form": 0}, {"id": "S03", "date": "2026-03-21", "opp": "Atlanta Forge", "price": 42.0, "att": 9368, "riv": false, "rain": false, "weather": "Clear night", "form": 1}, {"id": "S05", "date": "2026-04-04", "opp": "Nashville Rhythm", "price": 42.0, "att": 9509, "riv": false, "rain": false, "weather": "Clear night", "form": 3}, {"id": "S07", "date": "2026-04-19", "opp": "Houston Bayou SC", "price": 35.0, "att": 8402, "riv": false, "rain": false, "weather": "Hot and humid", "form": 2}, {"id": "S09", "date": "2026-05-02", "opp": "Jacksonville Surf", "price": 35.0, "att": 9000, "riv": false, "rain": false, "weather": "Sunny", "form": 0}, {"id": "S11", "date": "2026-05-15", "opp": "Memphis Blues SC", "price": 35.0, "att": 9003, "riv": false, "rain": false, "weather": "Clear night", "form": 2}, {"id": "S13", "date": "2026-05-30", "opp": "Birmingham Iron", "price": 42.0, "att": 8302, "riv": false, "rain": false, "weather": "Clear night", "form": 2}, {"id": "S15", "date": "2026-06-13", "opp": "Richmond Rebels", "price": 32.0, "att": 9058, "riv": false, "rain": false, "weather": "Clear night", "form": 0}, {"id": "S17", "date": "2026-06-27", "opp": "Sarasota Keys FC", "price": 42.0, "att": 6984, "riv": false, "rain": false, "weather": "Sunny", "form": 1}, {"id": "S18", "date": "2026-07-03", "opp": "Orlando Pines SC", "price": 46.0, "att": 10599, "riv": true, "rain": false, "weather": "Sunny", "form": 2}, {"id": "S20", "date": "2026-07-19", "opp": "Atlanta Forge", "price": 32.0, "att": 8237, "riv": false, "rain": false, "weather": "Sunny", "form": 2}, {"id": "S22", "date": "2026-07-31", "opp": "Nashville Rhythm", "price": 42.0, "att": 8839, "riv": false, "rain": false, "weather": "Clear night", "form": 1}, {"id": "S24", "date": "2026-08-15", "opp": "Houston Bayou SC", "price": 38.0, "att": 7542, "riv": false, "rain": true, "weather": "Rain", "form": 2}, {"id": "S26", "date": "2026-08-29", "opp": "Jacksonville Surf", "price": 32.0, "att": 7958, "riv": false, "rain": true, "weather": "Rain", "form": 1}, {"id": "S28", "date": "2026-09-16", "opp": "Memphis Blues SC", "price": 38.0, "att": 6990, "riv": false, "rain": false, "weather": "Clear night", "form": 0}, {"id": "S30", "date": "2026-09-26", "opp": "Birmingham Iron", "price": 32.0, "att": 9411, "riv": false, "rain": false, "weather": "Clear night", "form": 0}, {"id": "S32", "date": "2026-10-11", "opp": "Richmond Rebels", "price": 38.0, "att": 7894, "riv": false, "rain": false, "weather": "Clear night", "form": 0}, {"id": "S34", "date": "2026-10-23", "opp": "Sarasota Keys FC", "price": 38.0, "att": 7599, "riv": false, "rain": false, "weather": "Sunny", "form": 1}], "B": [{"id": "B01", "date": "2026-11-07", "opp": "Orlando Comets", "price": 36.0, "att": 5387, "riv": true, "form": 0}, {"id": "B03", "date": "2026-11-13", "opp": "Jacksonville Jets", "price": 27.0, "att": 4988, "riv": false, "form": 1}, {"id": "B05", "date": "2026-11-21", "opp": "Charlotte Hornet Hall", "price": 27.0, "att": 3971, "riv": false, "form": 1}, {"id": "B07", "date": "2026-11-28", "opp": "Birmingham Steel", "price": 30.0, "att": 4376, "riv": false, "form": 1}, {"id": "B09", "date": "2026-12-05", "opp": "Memphis Kings", "price": 30.0, "att": 4374, "riv": false, "form": 2}, {"id": "B11", "date": "2026-12-12", "opp": "Orlando Comets", "price": 30.0, "att": 5374, "riv": true, "form": 2}, {"id": "B13", "date": "2026-12-19", "opp": "Jacksonville Jets", "price": 27.0, "att": 4833, "riv": false, "form": 2}, {"id": "B15", "date": "2026-12-26", "opp": "Charlotte Hornet Hall", "price": 27.0, "att": 5333, "riv": false, "form": 1}, {"id": "B17", "date": "2027-01-02", "opp": "Birmingham Steel", "price": 30.0, "att": 4886, "riv": false, "form": 2}, {"id": "B19", "date": "2027-01-09", "opp": "Memphis Kings", "price": 27.0, "att": 4580, "riv": false, "form": 1}, {"id": "B21", "date": "2027-01-16", "opp": "Orlando Comets", "price": 33.0, "att": 5433, "riv": true, "form": 0}, {"id": "B23", "date": "2027-01-22", "opp": "Jacksonville Jets", "price": 24.0, "att": 5925, "riv": false, "form": 1}, {"id": "B25", "date": "2027-01-29", "opp": "Charlotte Hornet Hall", "price": 34.0, "att": 4808, "riv": false, "form": 2}, {"id": "B27", "date": "2027-02-05", "opp": "Birmingham Steel", "price": 30.0, "att": 4616, "riv": false, "form": 1}, {"id": "B29", "date": "2027-02-13", "opp": "Memphis Kings", "price": 27.0, "att": 4298, "riv": false, "form": 0}, {"id": "B31", "date": "2027-02-20", "opp": "Orlando Comets", "price": 30.0, "att": 5211, "riv": true, "form": 2}, {"id": "B33", "date": "2027-02-27", "opp": "Jacksonville Jets", "price": 34.0, "att": 4092, "riv": false, "form": 3}, {"id": "B35", "date": "2027-03-05", "opp": "Charlotte Hornet Hall", "price": 27.0, "att": 5033, "riv": false, "form": 3}, {"id": "B37", "date": "2027-03-13", "opp": "Birmingham Steel", "price": 24.0, "att": 6000, "riv": false, "form": 3}, {"id": "B39", "date": "2027-03-19", "opp": "Memphis Kings", "price": 34.0, "att": 4925, "riv": false, "form": 3}]};
+const $=id=>document.getElementById(id);
+function corr(x,y){const n=x.length,mx=x.reduce((a,b)=>a+b,0)/n,my=y.reduce((a,b)=>a+b,0)/n;let sxy=0,sx=0,sy=0;for(let i=0;i<n;i++){sxy+=(x[i]-mx)*(y[i]-my);sx+=(x[i]-mx)**2;sy+=(y[i]-my)**2;}return sxy/Math.sqrt(sx*sy);}
+function word(r){const a=Math.abs(r);const s=a<0.2?"very weak":a<0.4?"weak":a<0.6?"moderate":a<0.8?"strong":"very strong";return s+(a<0.2?"":(r>0?" positive":" negative"));}
+const VIEWS=[
+ {title:"Do higher ticket prices bring bigger crowds?",q:"Biscayne Bay FC home matches. Each dot is one match: the average ticket price and the attendance.",data:D.S,x:"price",xl:"Average ticket price ($)",y:"att",yl:"Attendance",group:"riv",gname:["Regular match","Rivalry match"],
+  before:"At first glance, matches with higher prices drew bigger crowds. Should the club raise prices to fill the stadium?",
+  after:"Rivalry matches (red) against Orlando Pines SC drew big crowds and also had higher prices, because the club charges more when demand is high. The rivalry drives both. Look only at regular matches and the link turns slightly negative: higher prices, a little smaller crowds. Raising prices would not bring more fans."},
+ {title:"Does price matter in the arena?",q:"Biscayne Bay Breakers home games. Each dot is one game: the average ticket price and the attendance.",data:D.B,x:"price",xl:"Average ticket price ($)",y:"att",yl:"Attendance",group:"riv",gname:["Regular game","Rivalry game"],
+  before:"Across all games, higher prices go with slightly smaller crowds. The link looks weak.",
+  after:"Rivalry games (red) against the Orlando Comets had higher prices and big crowds anyway, which hides the real effect. Among regular games, the link is much stronger: when price goes up, attendance clearly drops. Mixing different kinds of games can hide a pattern as easily as it can create a false one."},
+ {title:"Do winning streaks fill the stadium?",q:"Biscayne Bay FC home matches. Each dot is one match: wins in the team's previous three matches and the attendance.",data:D.S,x:"form",xl:"Wins in the previous 3 matches",y:"att",yl:"Attendance",group:"rain",gname:["Dry weather","Rain"],
+  before:"Many fans say \"win and they will come.\" In this season's data, recent wins have only a very weak link with attendance.",
+  after:"Rain (red) matters in this open-air stadium: both rainy matches drew fewer fans than the home average, whatever the team's form. A weak correlation does not mean form never matters, only that other factors (weather, opponent, day of the week, promotions) mattered more this season. Test popular beliefs with data before building a plan on them."}
+];
+let v=0, revealed=false;
+function draw(){
+  const V=VIEWS[v], d=V.data, W=620,H=400,L=78,Rr=20,T=20,Bm=50;
+  const xs=d.map(p=>p[V.x]), ys=d.map(p=>p[V.y]);
+  let x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const px=(x1-x0)*0.1||1, py=(y1-y0)*0.1; x0-=px;x1+=px;y0=Math.floor((y0-py)/500)*500;y1=Math.ceil((y1+py)/500)*500;
+  const sx=x=>L+(x-x0)/(x1-x0)*(W-L-Rr), sy=y=>H-Bm-(y-y0)/(y1-y0)*(H-T-Bm);
+  let s=`<rect x="${L}" y="${T}" width="${W-L-Rr}" height="${H-T-Bm}" fill="#FAFBFC" stroke="#E3E6EB"/>`;
+  for(let y=y0;y<=y1;y+=(y1-y0)>4000?1000:500){s+=`<line x1="${L}" x2="${W-Rr}" y1="${sy(y)}" y2="${sy(y)}" stroke="#EEF0F3"/><text x="${L-8}" y="${sy(y)+4}" font-size="14" text-anchor="end" fill="#6B7280">${y.toLocaleString()}</text>`;}
+  const xt=V.x==="form"?[0,1,2,3]:Array.from({length:6},(_,i)=>Math.round(x0+(x1-x0)*i/5));
+  xt.forEach(x=>{s+=`<text x="${sx(x)}" y="${H-Bm+18}" font-size="14" text-anchor="middle" fill="#6B7280">${x}</text>`;});
+  s+=`<text x="${(L+W-Rr)/2}" y="${H-10}" font-size="15" text-anchor="middle" fill="#3B4250" font-weight="600">${V.xl}</text>`;
+  s+=`<text x="16" y="${(T+H-Bm)/2}" font-size="15" text-anchor="middle" fill="#3B4250" font-weight="600" transform="rotate(-90 16 ${(T+H-Bm)/2})">${V.yl}</text>`;
+  // trend line(s)
+  function tl(pts,color,dash){if(pts.length<3)return "";const X=pts.map(p=>p[V.x]),Y=pts.map(p=>p[V.y]);const mx=X.reduce((a,b)=>a+b,0)/X.length,my=Y.reduce((a,b)=>a+b,0)/Y.length;let num=0,den=0;X.forEach((x,i)=>{num+=(x-mx)*(Y[i]-my);den+=(x-mx)**2;});const m=den?num/den:0,b=my-m*mx;const a=Math.min(...X),z=Math.max(...X);return `<line x1="${sx(a)}" y1="${sy(m*a+b)}" x2="${sx(z)}" y2="${sy(m*z+b)}" stroke="${color}" stroke-width="2.5" ${dash?'stroke-dasharray="6 5"':''}/>`;}
+  if(!revealed) s+=tl(d,"#3B4250",true); else s+=tl(d.filter(p=>!p[V.group]),"#2563EB",false);
+  // jitter for form
+  d.forEach((p,i)=>{const jx=V.x==="form"?((i%5)-2)*0.06:0;const c=revealed&&p[V.group]?"#E1141E":(revealed?"#2563EB":"#3B4250");
+    s+=`<circle class="pt" data-i="${i}" cx="${sx(p[V.x]+jx)}" cy="${sy(p[V.y])}" r="8" fill="${c}" fill-opacity="0.8" stroke="#fff" stroke-width="1.5" tabindex="0"/>`;});
+  $("plot").innerHTML=s;
+  if(window.gsap) gsap.from("#plot .pt",{attr:{r:0},duration:0.4,stagger:0.015});
+  document.querySelectorAll("#plot .pt").forEach(c=>{const show=()=>{const p=d[+c.dataset.i];const t=$("tip");t.hidden=false;t.textContent=`${p.date} vs ${p.opp}: ${p.att.toLocaleString()} fans, $${p.price}`+(V.x==="form"?`, ${p.form} wins in last 3`:"");const bb=$("plot").getBoundingClientRect(),cb=c.getBoundingClientRect();t.style.left=Math.min(cb.left-bb.left,bb.width-230)+"px";t.style.top=(cb.top-bb.top-34)+"px";};
+    c.onmouseenter=show;c.onfocus=show;c.onmouseleave=()=>$("tip").hidden=true;c.onblur=()=>$("tip").hidden=true;});
+  const r=corr(xs,ys); $("rall").textContent=r.toFixed(2); $("rallw").textContent=word(r);
+  const sub=d.filter(p=>!p[V.group]); const r2=corr(sub.map(p=>p[V.x]),sub.map(p=>p[V.y]));
+  $("r2box").hidden=!revealed; $("r2l").textContent="Correlation, "+V.gname[0].toLowerCase()+"s only"; $("r2").textContent=r2.toFixed(2); $("r2w").textContent=word(r2);
+  $("mk").style.left=((revealed?r2:r)+1)/2*100+"%";
+  $("vtitle").textContent=V.title; $("vq").textContent=V.q;
+  $("story").innerHTML=`<div class="feedback ${revealed?'ok':'info'}">${revealed?V.after:V.before}</div>`;
+  $("legend").innerHTML=revealed?`<span><i class="dot" style="background:#2563EB"></i>${V.gname[0]}</span><span><i class="dot" style="background:#E1141E"></i>${V.gname[1]}</span><span>Solid line: trend for ${V.gname[0].toLowerCase()}s</span>`:`<span><i class="dot" style="background:#3B4250"></i>Home game</span><span>Dashed line: overall trend</span>`;
+  $("reveal").textContent=revealed?"Hide the hidden factor":"Reveal the hidden factor";
+}
+document.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>{v=+b.dataset.v;revealed=false;document.querySelectorAll('[role=tab]').forEach(x=>x.setAttribute("aria-selected",x===b));draw();});
+$("reveal").onclick=()=>{revealed=!revealed;draw();};
+const Q=[
+ ["Ice cream sales and stadium attendance both rise in summer. What is the best conclusion?",["Ice cream makes people go to games","Summer weather (a third factor) likely drives both","Attendance causes ice cream sales","The data must be wrong"],1,"Two things rising together can share a cause, here the season and the weather."],
+ ["A correlation of -0.51 between price and attendance means:",["Higher prices usually go with smaller crowds","Higher prices usually go with bigger crowds","Price has no link with attendance","Price causes exactly half of the attendance change"],0,"Negative means they move in opposite directions; 0.5 is a moderate link, not a percentage of cause."],
+ ["Rivalry games have higher prices and bigger crowds. What should an analyst do before concluding that higher prices attract fans?",["Raise all prices","Compare games of the same type (rivalry with rivalry, regular with regular)","Delete the rivalry games","Ask fans on social media"],1,"Comparing like with like removes the effect of the third factor."],
+ ["Which statement about correlation is true?",["A strong correlation proves cause and effect","A weak correlation proves there is no effect at all","Correlation shows how closely two things move together, not why","Correlation only works with money"],2,"Correlation describes a pattern. Testing a cause needs more evidence, such as a controlled experiment or careful comparison."],
+ ["The marketing team wants to run a test to see if a promotion really raises attendance. What is the strongest design?",["Run the promotion only at rivalry games","Run it at some similar regular games and not others, then compare","Run it once and see what happens","Ask the AI assistant to guess"],1,"Comparing similar games with and without the promotion isolates its effect."]
+];
+let answered=0,correct=0;
+$("quiz").innerHTML=Q.map((q,i)=>`<div class="q"><b>${i+1}. ${q[0]}</b><div class="opts">${q[1].map((o,j)=>`<button data-q="${i}" data-o="${j}">${o}</button>`).join("")}</div><div id="ex${i}"></div></div>`).join("");
+document.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{const i=+b.dataset.q,o=+b.dataset.o;const box=b.parentElement;if(box.dataset.done)return;box.dataset.done=1;answered++;
+  const ok=o===Q[i][2]; if(ok)correct++; b.classList.add(ok?"right":"wrong"); box.children[Q[i][2]].classList.add("right");
+  $("ex"+i).innerHTML=`<p class="note" style="margin:6px 0 0">${Q[i][3]}</p>`; $("qs").textContent=correct; $("qn").textContent=` of ${Q.length}`+(answered===Q.length?" · done":"");});
+$("qn").textContent=` of ${Q.length}`;
+draw();
+
+</script>
+</body>
+</html>
