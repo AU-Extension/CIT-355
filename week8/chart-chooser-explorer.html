@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choose the Right Chart</title>
+<meta name="description" content="CIT 355 Week 8 interactive: match each message to the right chart and fix misleading charts using Biscayne Bay data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#fff;gap:2px;flex-wrap:wrap}
+  .toggle button{font:inherit;font-size:14px;font-weight:600;border:0;background:transparent;padding:7px 14px;border-radius:999px;cursor:pointer;color:var(--ink-2)}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .tab{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);border-radius:10px;padding:9px 14px;background:#fff;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .pair{display:grid;gap:14px}
+  @media(min-width:860px){.pair{grid-template-columns:1fr 1fr}}
+  .panel{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}
+  .panel.good{border-top:5px solid var(--ok)}
+  .panel.poor{border-top:5px solid var(--bad)}
+  .panel h3{display:flex;align-items:center;gap:8px}
+  .tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .tag.g{background:var(--ok-soft);color:#14532D}.tag.p{background:var(--bad-soft);color:#7F1D1D}
+  .panel svg{width:100%;height:auto;display:block;margin:6px 0}
+  .headline{font-weight:700;font-size:15px;margin:4px 0 2px}
+  .why{font-size:14px;color:var(--ink-2);margin:6px 0 0}
+  .fixgrid{display:grid;gap:14px}
+  @media(min-width:860px){.fixgrid{grid-template-columns:1fr 1fr}}
+  .quiz-q{border-top:1px solid var(--line);padding:12px 0}
+  .quiz-q:first-of-type{border-top:0}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .opts .btn.right{background:var(--ok-soft);border-color:#BBE5C8}
+  .opts .btn.wrong{background:var(--bad-soft);border-color:#F5C2C2}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 8 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 8 · Explorer</span>
+    <h1>Data storytelling: choose the right chart</h1>
+    <p class="lede">A board member gives your chart about five seconds. Pick the message first, then the chart that shows it best. Compare good and poor choices drawn with real Biscayne Bay data, and learn to fix charts that mislead.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol>
+      <li>Choose a team at the top. The charts redraw with that team's data.</li>
+      <li>Pick a message type: change over time, comparison, part of a whole, relationship, or ranking.</li>
+      <li>Compare the good chart with the poor chart and read why one works better.</li>
+      <li>Scroll to "Fix this chart" and use the buttons to see each misleading chart corrected.</li>
+      <li>Finish with the five quick questions.</li>
+    </ol>
+  </details>
+
+  <section class="card">
+    <div class="toggle" role="group" aria-label="Team">
+      <button type="button" data-team="FC" aria-pressed="true">Soccer: Biscayne Bay FC</button>
+      <button type="button" data-team="BR" aria-pressed="false">Basketball: Breakers</button>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Message type" id="tabs"></div>
+    <p id="msgHelp" style="margin:0 0 12px;color:var(--ink-2)"></p>
+    <div class="pair">
+      <div class="panel good"><h3><span class="tag g">Good choice</span><span id="gName"></span></h3><div class="headline" id="gHead"></div><svg id="gSvg" viewBox="0 0 520 300" role="img"></svg><p class="why" id="gWhy"></p></div>
+      <div class="panel poor"><h3><span class="tag p">Poor choice</span><span id="pName"></span></h3><div class="headline" id="pHead" style="color:var(--muted)"></div><svg id="pSvg" viewBox="0 0 520 300" role="img"></svg><p class="why" id="pWhy"></p></div>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Fix this chart</h2>
+    <p style="margin:0 0 12px;color:var(--ink-2)">Each chart below uses real numbers but tells the story badly or misleads. Press the button to see the fix.</p>
+    <div class="fixgrid" id="fixes"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>Check your understanding</h2>
+    <div id="quizBox"></div>
+    <div class="score" style="margin-top:10px">Score: <span class="big" id="qScore">0</span> / 5</div>
+  </section>
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+<script>
+const hasGSAP = typeof window.gsap !== "undefined";
+
+const ST = {"soccer_att": [["S01", "2026-03-07", "Orlando Pines SC", 9631, "Yes", "Saturday", "Fireworks", 50.0, "Sunny"], ["S03", "2026-03-21", "Atlanta Forge", 9368, "No", "Saturday", "Fan giveaway", 42.0, "Clear night"], ["S05", "2026-04-04", "Nashville Rhythm", 9509, "No", "Saturday", "Kids free", 42.0, "Clear night"], ["S07", "2026-04-19", "Houston Bayou SC", 8402, "No", "Sunday", "Fan giveaway", 35.0, "Hot and humid"], ["S09", "2026-05-02", "Jacksonville Surf", 9000, "No", "Saturday", "Fan giveaway", 35.0, "Sunny"], ["S11", "2026-05-15", "Memphis Blues SC", 9003, "No", "Friday", "None", 35.0, "Clear night"], ["S13", "2026-05-30", "Birmingham Iron", 8302, "No", "Saturday", "None", 42.0, "Clear night"], ["S15", "2026-06-13", "Richmond Rebels", 9058, "No", "Saturday", "Fireworks", 32.0, "Clear night"], ["S17", "2026-06-27", "Sarasota Keys FC", 6984, "No", "Saturday", "None", 42.0, "Sunny"], ["S18", "2026-07-03", "Orlando Pines SC", 10599, "Yes", "Friday", "Fan giveaway", 46.0, "Sunny"], ["S20", "2026-07-19", "Atlanta Forge", 8237, "No", "Sunday", "Fan giveaway", 32.0, "Sunny"], ["S22", "2026-07-31", "Nashville Rhythm", 8839, "No", "Friday", "None", 42.0, "Clear night"], ["S24", "2026-08-15", "Houston Bayou SC", 7542, "No", "Saturday", "Heritage night", 38.0, "Rain"], ["S26", "2026-08-29", "Jacksonville Surf", 7958, "No", "Saturday", "None", 32.0, "Rain"], ["S28", "2026-09-16", "Memphis Blues SC", 6990, "No", "Wednesday", "None", 38.0, "Clear night"], ["S30", "2026-09-26", "Birmingham Iron", 9411, "No", "Saturday", "Fan giveaway", 32.0, "Clear night"], ["S32", "2026-10-11", "Richmond Rebels", 7894, "No", "Sunday", "Heritage night", 38.0, "Clear night"], ["S34", "2026-10-23", "Sarasota Keys FC", 7599, "No", "Friday", "None", 38.0, "Sunny"]], "bball_att": [["B01", "2026-11-07", "Orlando Comets", 5387, "Yes", "Saturday", "Family pack", 36.0], ["B03", "2026-11-13", "Jacksonville Jets", 4988, "No", "Friday", "None", 27.0], ["B05", "2026-11-21", "Charlotte Hornet Hall", 3971, "No", "Saturday", "None", 27.0], ["B07", "2026-11-28", "Birmingham Steel", 4376, "No", "Saturday", "None", 30.0], ["B09", "2026-12-05", "Memphis Kings", 4374, "No", "Saturday", "None", 30.0], ["B11", "2026-12-12", "Orlando Comets", 5374, "Yes", "Saturday", "None", 30.0], ["B13", "2026-12-19", "Jacksonville Jets", 4833, "No", "Saturday", "None", 27.0], ["B15", "2026-12-26", "Charlotte Hornet Hall", 5333, "No", "Saturday", "Family pack", 27.0], ["B17", "2027-01-02", "Birmingham Steel", 4886, "No", "Saturday", "Halftime concert", 30.0], ["B19", "2027-01-09", "Memphis Kings", 4580, "No", "Saturday", "None", 27.0], ["B21", "2027-01-16", "Orlando Comets", 5433, "Yes", "Saturday", "Student night", 33.0], ["B23", "2027-01-22", "Jacksonville Jets", 5925, "No", "Friday", "Student night", 24.0], ["B25", "2027-01-29", "Charlotte Hornet Hall", 4808, "No", "Friday", "Bobblehead", 34.0], ["B27", "2027-02-05", "Birmingham Steel", 4616, "No", "Friday", "Student night", 30.0], ["B29", "2027-02-13", "Memphis Kings", 4298, "No", "Saturday", "None", 27.0], ["B31", "2027-02-20", "Orlando Comets", 5211, "Yes", "Saturday", "None", 30.0], ["B33", "2027-02-27", "Jacksonville Jets", 4092, "No", "Saturday", "None", 34.0], ["B35", "2027-03-05", "Charlotte Hornet Hall", 5033, "No", "Friday", "None", 27.0], ["B37", "2027-03-13", "Birmingham Steel", 6000, "No", "Saturday", "Family pack", 24.0], ["B39", "2027-03-19", "Memphis Kings", 4925, "No", "Friday", "None", 34.0]], "soccer_by_promotion": {"Fireworks": [9344, 2], "Fan giveaway": [9170, 6], "Kids free": [9509, 1], "None": [7954, 7], "Heritage night": [7718, 2]}, "bball_by_promotion": {"Family pack": [5573, 3], "None": [4671, 12], "Halftime concert": [4886, 1], "Student night": [5325, 3], "Bobblehead": [4808, 1]}, "soccer_by_day_of_week": {"Saturday": [8676, 10], "Sunday": [8178, 3], "Friday": [9010, 4], "Wednesday": [6990, 1]}, "bball_by_day_of_week": {"Saturday": [4868, 14], "Friday": [5049, 6]}, "soccer_by_rivalry": {"Yes": [10115, 2], "No": [8381, 16]}, "bball_by_rivalry": {"Yes": [5351, 4], "No": [4815, 16]}, "soccer_by_weather": {"Sunny": [8675, 6], "Clear night": [8708, 9], "Hot and humid": [8402, 1], "Rain": [7750, 2]}, "rev_by_section": {"Biscayne Bay FC": {"Supporters End": 703971, "Lower Bowl": 2652560, "Upper Deck": 1190535, "Club Seats": 734265}, "Biscayne Bay Breakers": {"Courtside": 358727, "Lower Level": 2111752, "Upper Level": 1472380, "Student Section": 56652}}, "price_vs_sold": {"Biscayne Bay FC": [[28.75, 2573, 3800], [27.5, 2763, 3800], [22.5, 3331, 3800], [27.5, 2212, 3800], [25.0, 2644, 3800], [25.0, 3011, 3800], [27.5, 2471, 3800], [27.5, 2419, 3800], [27.5, 1847, 3800], [34.5, 2375, 3800], [25.0, 2445, 3800], [22.5, 2964, 3800], [30.0, 1936, 3800], [30.0, 2007, 3800], [25.0, 2231, 3800], [25.0, 2963, 3800], [30.0, 2054, 3800], [25.0, 2346, 3800]], "Biscayne Bay Breakers": [[35.42, 2239, 3300], [30.8, 2576, 3300], [25.2, 2515, 3300], [33.6, 2061, 3300], [28.0, 2387, 3300], [28.98, 2867, 3300], [25.2, 2890, 3300], [28.0, 2843, 3300], [28.0, 2755, 3300], [28.0, 2440, 3300], [38.64, 1999, 3300], [33.6, 2544, 3300], [25.2, 2821, 3300], [30.8, 2264, 3300], [25.2, 2476, 3300], [32.2, 2278, 3300], [33.6, 1753, 3300], [33.6, 2260, 3300], [25.2, 3300, 3300], [30.8, 2468, 3300]]}, "sponsors": [["Bay Credit Union", "Both", 450000, 783836, 14130037, 1584, "Renewing", 74], ["Sol Energy Drinks", "Soccer", 220000, 486556, 3493016, 290, "Renewing", 121], ["Coral Auto Group", "Both", 380000, 366954, 5830397, 2197, "At risk", -3], ["Calle Ocho Café", "Soccer", 60000, 54742, 2255752, 900, "Renewing", -9], ["Magic City Health", "Both", 300000, 252564, 4638495, 1370, "Undecided", -16], ["Breeze Telecom", "Basketball", 250000, 270253, 5509355, 365, "Renewing", 8], ["Palmetto Insurance", "Basketball", 140000, 239166, 4752038, 219, "Undecided", 71], ["Everglades Water", "Basketball", 90000, 79023, 3863358, 1307, "Undecided", -12], ["Key Biscayne Resorts", "Soccer", 120000, 77009, 4216632, 2042, "Renewing", -36], ["Doral Logistics", "Soccer", 75000, 70220, 1526142, 444, "Renewing", -6], ["Brickell Law Partners", "Basketball", 50000, 107915, 1662630, 2142, "Renewing", 116], ["FitLife Gyms", "Both", 110000, 133200, 4419135, 1475, "Renewing", 21]], "renewal": {"holders": 235, "renewed": 170, "Soccer": [114, 82], "Basketball": [69, 48], "Both": [52, 40]}, "renewal_by_attendance": {"low": [91, 51], "high": [144, 119]}, "totals": {"soccer_avg": 8574, "bb_avg": 4922, "soccer_fill": 71.4, "bb_fill": 82.0, "soccer_ticket_rev": 5281331, "bb_ticket_rev": 3999511}, "records": {"soccer": {"W": 14, "D": 7, "L": 13}, "bball": {"W": 23, "L": 17}}};
+let team="FC", msg="time";
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+const money=n=>"$"+Math.round(n).toLocaleString("en-US");
+const NS="http://www.w3.org/2000/svg";
+function E(tag,a,t){ const e=document.createElementNS(NS,tag); for(const k in a) e.setAttribute(k,a[k]); if(t!=null) e.textContent=t; return e; }
+const GREY="#94A3B8", HI="#E1141E", INK="#16181D";
+const RAINBOW=["#EF4444","#F59E0B","#10B981","#3B82F6","#8B5CF6","#EC4899","#14B8A6","#F97316","#84CC16","#06B6D4","#A855F7","#EAB308"];
+
+function nice(v){ const m=Math.pow(10,Math.floor(Math.log10(v))); for(const f of [1,1.2,1.5,2,2.5,3,4,5,6,8,10]) if(f*m>=v) return f*m; return 10*m; }
+function axisY(s,x0,y0,h,max,steps,lab,minV){ minV=minV||0; for(let k=0;k<=steps;k++){ const v=minV+(max-minV)*k/steps, y=y0-h*k/steps; s.appendChild(E("line",{x1:x0,x2:510,y1:y,y2:y,stroke:"#E3E6EB"})); s.appendChild(E("text",{x:x0-6,y:y+4,"text-anchor":"end","font-size":11,fill:"#6B7280"},lab(v))); } }
+function line(s,vals,labels,opts){ opts=opts||{}; const x0=58,y0=262,h=230,w=440; const max=opts.max||nice(Math.max(...vals)*1.1), min=opts.min||0;
+  axisY(s,x0,y0,h,max,4,v=>fmt(v),min);
+  const X=i=>x0+w*i/(vals.length-1), Y=v=>y0-h*(v-min)/(max-min);
+  let d=""; vals.forEach((v,i)=>d+=(i?"L":"M")+X(i)+","+Y(v)); const p=E("path",{d,fill:"none",stroke:opts.color||INK,"stroke-width":2.5}); s.appendChild(p);
+  vals.forEach((v,i)=>{ const c=E("circle",{cx:X(i),cy:Y(v),r:3.5,fill:opts.color||INK}); c.appendChild(E("title",{},labels[i]+": "+fmt(v))); s.appendChild(c); });
+  [0,Math.floor((labels.length-1)/2),labels.length-1].forEach(i=>s.appendChild(E("text",{x:X(i),y:284,"text-anchor":"middle","font-size":11,fill:"#3B4250"},labels[i])));
+  if(hasGSAP){ const L=p.getTotalLength(); p.style.strokeDasharray=L; p.style.strokeDashoffset=L; gsap.to(p,{strokeDashoffset:0,duration:.8}); } }
+function bars(s,items,opts){ opts=opts||{}; const x0=58,y0=250,h=220,w=446; const max=opts.max||nice(Math.max(...items.map(d=>d[1]))*1.12), min=opts.min||0;
+  axisY(s,x0,y0,h,max,4,opts.lab||(v=>fmt(v)),min);
+  const bw=w/items.length;
+  items.forEach((d,i)=>{ const v=d[1], y=y0-h*(v-min)/(max-min); const r=E("rect",{x:x0+bw*i+bw*.16,y,width:bw*.68,height:y0-y,rx:3,fill:d[2]||GREY}); r.appendChild(E("title",{},d[0]+": "+(opts.lab?opts.lab(v):fmt(v)))); s.appendChild(r);
+    if(hasGSAP) gsap.from(r,{attr:{y:y0,height:0},duration:.5,delay:i*.04});
+    s.appendChild(E("text",{x:x0+bw*i+bw/2,y:y-5,"text-anchor":"middle","font-size":11,"font-weight":700,fill:INK},opts.lab?opts.lab(v):fmt(v)));
+    const words=d[0].split(" "); const l1=words.slice(0,Math.ceil(words.length/2)).join(" "), l2=words.slice(Math.ceil(words.length/2)).join(" ");
+    s.appendChild(E("text",{x:x0+bw*i+bw/2,y:266,"text-anchor":"middle","font-size":10.5,fill:"#3B4250"},l1)); if(l2) s.appendChild(E("text",{x:x0+bw*i+bw/2,y:279,"text-anchor":"middle","font-size":10.5,fill:"#3B4250"},l2)); }); }
+function hbars(s,items,lab){ const x0=170,w=290,top=14,rowH=Math.min(34,270/items.length); const max=Math.max(...items.map(d=>Math.abs(d[1]))); const minV=Math.min(0,...items.map(d=>d[1]));
+  const scale=w/(max-minV), zero=x0+(-minV)*scale;
+  s.appendChild(E("line",{x1:zero,x2:zero,y1:top-4,y2:top+rowH*items.length,stroke:"#6B7280"}));
+  items.forEach((d,i)=>{ const v=d[1], y=top+rowH*i; const x=v>=0?zero:zero+v*scale; const r=E("rect",{x,y:y+3,width:Math.abs(v)*scale,height:rowH-8,rx:3,fill:d[2]}); s.appendChild(r); if(hasGSAP) gsap.from(r,{attr:{width:0,x:zero},duration:.5,delay:i*.03});
+    s.appendChild(E("text",{x:x0-8,y:y+rowH/2+4,"text-anchor":"end","font-size":11,fill:"#3B4250"},d[0]));
+    s.appendChild(E("text",{x:v>=0?x+Math.abs(v)*scale+4:zero+4,y:y+rowH/2+4,"text-anchor":"start","font-size":11,"font-weight":700,fill:v>=0?INK:"#B91C1C"},lab(v))); }); }
+function pie(s,items,colors,cx,cy,r){ cx=cx||170; cy=cy||150; r=r||115; const tot=items.reduce((a,d)=>a+d[1],0); let a0=-Math.PI/2;
+  items.forEach((d,i)=>{ const a1=a0+2*Math.PI*d[1]/tot; const large=a1-a0>Math.PI?1:0; const p=E("path",{d:`M${cx},${cy} L${cx+r*Math.cos(a0)},${cy+r*Math.sin(a0)} A${r},${r} 0 ${large} 1 ${cx+r*Math.cos(a1)},${cy+r*Math.sin(a1)} Z`,fill:colors[i%colors.length],stroke:"#fff","stroke-width":1}); p.appendChild(E("title",{},d[0]+": "+fmt(d[1]))); s.appendChild(p); a0=a1; });
+  items.slice(0,12).forEach((d,i)=>{ s.appendChild(E("rect",{x:310,y:22+i*20,width:11,height:11,fill:colors[i%colors.length]})); s.appendChild(E("text",{x:326,y:32+i*20,"font-size":10.5,fill:"#3B4250"},d[0].length>26?d[0].slice(0,25)+"…":d[0])); }); }
+function scatter(s,pts,xl,yl){ const x0=58,y0=252,h=222,w=440; const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]); const xmin=Math.min(...xs)*0.9,xmax=Math.max(...xs)*1.05,ymax=nice(Math.max(...ys)*1.1);
+  axisY(s,x0,y0,h,ymax,4,v=>fmt(v)); const X=v=>x0+w*(v-xmin)/(xmax-xmin), Y=v=>y0-h*v/ymax;
+  pts.forEach(p=>{ const c=E("circle",{cx:X(p[0]),cy:Y(p[1]),r:5,fill:HI,"fill-opacity":.75}); c.appendChild(E("title",{},"$"+p[0]+": "+fmt(p[1])+" sold")); s.appendChild(c); if(hasGSAP) gsap.from(c,{attr:{r:0},duration:.4}); });
+  const n=pts.length, mx=xs.reduce((a,b)=>a+b)/n, my=ys.reduce((a,b)=>a+b)/n; let num=0,den=0; pts.forEach(p=>{num+=(p[0]-mx)*(p[1]-my); den+=(p[0]-mx)**2;}); const b=num/den, a=my-b*mx;
+  s.appendChild(E("line",{x1:X(xmin),y1:Y(a+b*xmin),x2:X(xmax),y2:Y(a+b*xmax),stroke:INK,"stroke-width":1.5,"stroke-dasharray":"5 4"}));
+  for(let k=0;k<=4;k++){ const v=xmin+(xmax-xmin)*k/4; s.appendChild(E("text",{x:X(v),y:270,"text-anchor":"middle","font-size":11,fill:"#3B4250"},"$"+v.toFixed(0))); }
+  s.appendChild(E("text",{x:284,y:290,"text-anchor":"middle","font-size":11,fill:"#6B7280"},xl)); s.appendChild(E("text",{x:6,y:14,"font-size":11,fill:"#6B7280"},yl)); return b; }
+
+function teamData(){
+  const fc=team==="FC";
+  const games=fc?ST.soccer_att:ST.bball_att;
+  const promo=fc?ST.soccer_by_promotion:ST.bball_by_promotion;
+  const rev=ST.rev_by_section[fc?"Biscayne Bay FC":"Biscayne Bay Breakers"];
+  const pvs=ST.price_vs_sold[fc?"Biscayne Bay FC":"Biscayne Bay Breakers"];
+  const spons=ST.sponsors.filter(s=>s[1]===(fc?"Soccer":"Basketball")||s[1]==="Both");
+  return {fc,games,promo,rev,pvs,spons,name:fc?"Biscayne Bay FC":"the Breakers",cap:fc?12000:6000,section:fc?"Upper Deck":"Upper Level"};
+}
+const MSGS={
+ time:{label:"Change over time",help:"Use when the question is \"how did this change across the season?\" Time runs left to right."},
+ comp:{label:"Comparison",help:"Use when the question is \"which group is bigger?\" Bars make differences easy to see."},
+ part:{label:"Part of a whole",help:"Use when the question is \"what share does each piece contribute?\" Keep it to a few parts."},
+ rel:{label:"Relationship",help:"Use when the question is \"when one thing goes up, what happens to the other?\""},
+ rank:{label:"Ranking",help:"Use when the question is \"who is best and worst?\" Sort the bars."}
+};
+function tabs(){ const t=$("tabs"); t.innerHTML=""; Object.entries(MSGS).forEach(([k,v])=>{ const b=document.createElement("button"); b.type="button"; b.className="tab"; b.setAttribute("role","tab"); b.setAttribute("aria-selected",k===msg?"true":"false"); b.textContent=v.label; b.addEventListener("click",()=>{ msg=k; tabs(); draw(); }); t.appendChild(b); }); }
+function draw(){
+  const D=teamData(), g=$("gSvg"), p=$("pSvg"); g.innerHTML=""; p.innerHTML=""; $("msgHelp").textContent=MSGS[msg].help;
+  if(msg==="time"){
+    const vals=D.games.map(x=>x[3]), labs=D.games.map(x=>x[1].slice(5));
+    const first=vals.slice(0,Math.floor(vals.length/2)), second=vals.slice(Math.floor(vals.length/2)); const a1=first.reduce((a,b)=>a+b)/first.length, a2=second.reduce((a,b)=>a+b)/second.length;
+    $("gName").textContent="Line chart"; $("gHead").textContent="Home attendance for "+D.name+": first half of the season averaged "+fmt(a1)+", second half "+fmt(a2)+".";
+    line(g,vals,labs,{max:D.cap}); $("gWhy").textContent="Time runs left to right and the line shows rises and dips game by game. The axis goes up to stadium capacity, so empty seats are visible too.";
+    $("pName").textContent="Pie chart"; $("pHead").textContent="Attendance by game";
+    pie(p,D.games.map(x=>[x[1]+" vs "+x[2],x[3]]),RAINBOW); $("pWhy").textContent="A pie hides the order of the games, uses too many slices, and every slice looks almost the same size. Nobody can see a trend.";
+  } else if(msg==="comp"){
+    const items=Object.entries(D.promo).sort((a,b)=>b[1][0]-a[1][0]); const none=D.promo["None"][0];
+    const bestMulti=items.filter(x=>x[0]!=="None" && x[1][1]>=3)[0];
+    $("gName").textContent="Bar chart"; $("gHead").textContent=bestMulti?bestMulti[0]+" games averaged "+fmt(bestMulti[1][0])+" fans, "+fmt(bestMulti[1][0]-none)+" more than games with no promotion.":"Average home attendance by promotion.";
+    bars(g,items.map(x=>[x[0]+" ("+x[1][1]+")",x[1][0],x[0]==="None"?INK:(bestMulti&&x[0]===bestMulti[0]?HI:GREY)])); $("gWhy").textContent="Bars start at zero and are sorted, so the eye compares heights instantly. The number of games is shown in brackets: a promotion used once is weak evidence.";
+    $("pName").textContent="Line chart"; $("pHead").textContent="Promotions";
+    line(p,items.map(x=>x[1][0]).reverse(),items.map(x=>x[0]).reverse(),{min:Math.min(...items.map(x=>x[1][0]))*0.95}); $("pWhy").textContent="A line suggests the promotions happen in an order or a sequence. They do not. The cut-off axis also exaggerates the differences.";
+  } else if(msg==="part"){
+    const items=Object.entries(D.rev).sort((a,b)=>b[1]-a[1]); const tot=items.reduce((a,b)=>a+b[1],0);
+    $("gName").textContent="Stacked share bar"; $("gHead").textContent=items[0][0]+" brings in "+Math.round(items[0][1]/tot*100)+"% of "+D.name+" ticket revenue ("+money(tot)+" in total).";
+    const cols=[HI,"#475569",GREY,"#CBD5E1"]; let x=20; items.forEach((d,i)=>{ const w=480*d[1]/tot; const r=E("rect",{x,y:90,width:w,height:70,fill:cols[i]}); r.appendChild(E("title",{},d[0]+": "+money(d[1]))); g.appendChild(r); if(hasGSAP) gsap.from(r,{attr:{width:0},duration:.5,delay:i*.08});
+      g.appendChild(E("text",{x:x+w/2,y:130,"text-anchor":"middle","font-size":12,"font-weight":700,fill:i<2?"#fff":INK},w>44?Math.round(d[1]/tot*100)+"%":""));
+      g.appendChild(E("rect",{x:20,y:186+i*22,width:12,height:12,fill:cols[i]})); g.appendChild(E("text",{x:38,y:196+i*22,"font-size":12,fill:"#3B4250"},d[0]+": "+money(d[1])+" ("+Math.round(d[1]/tot*100)+"%)")); x+=w; });
+    $("gWhy").textContent="One bar equals 100% of revenue, so each section's share is easy to read. Four parts is a small enough number to label every piece.";
+    $("pName").textContent="Line chart"; $("pHead").textContent="Revenue";
+    line(p,items.map(x=>x[1]),items.map(x=>x[0])); $("pWhy").textContent="A line connects sections as if they were points in time and never shows that the parts add up to a whole.";
+  } else if(msg==="rel"){
+    $("gName").textContent="Scatter plot";
+    const b=scatter(g,D.pvs.map(x=>[x[0],x[1]]),D.section+" ticket price","Tickets sold");
+    $("gHead").textContent="In the "+D.section+", each $1 increase in price went with about "+fmt(Math.abs(b))+" fewer tickets sold per game.";
+    $("gWhy").textContent="Each dot is one home game. The dashed trend line shows the direction: higher prices, fewer tickets. Remember that a pattern is not proof of cause; rivalry games also change prices.";
+    $("pName").textContent="Bar chart by date"; $("pHead").textContent="Tickets sold per game";
+    bars(p,D.pvs.map((x,i)=>["G"+(i+1),x[1]])); $("pWhy").textContent="Bars by date show tickets sold but hide the price, so the relationship the manager asked about is invisible.";
+  } else {
+    const items=D.spons.map(s=>[s[0],s[7]]).sort((a,b)=>b[1]-a[1]);
+    $("gName").textContent="Sorted horizontal bars"; const neg=items.filter(x=>x[1]<0).length;
+    $("gHead").textContent=items[0][0]+" returns the most ("+items[0][1]+"%); "+neg+" of "+items.length+" sponsors show a negative return.";
+    hbars(g,items.map(x=>[x[0],x[1],x[1]<0?"#B91C1C":"#15803D"]),v=>v+"%"); $("gWhy").textContent="Sorted from best to worst, with long names readable on the left and red for negative returns. The ranking jumps out.";
+    $("pName").textContent="Unsorted rainbow bars"; $("pHead").textContent="Sponsor ROI";
+    const un=D.spons.map((s,i)=>[s[0].split(" ")[0],s[7],RAINBOW[i%RAINBOW.length]]); bars(p,un.map(x=>[x[0],Math.max(0,x[1]),x[2]]),{lab:v=>v+"%"});
+    $("pWhy").textContent="Unsorted bars force the reader to hunt for the best and worst, rainbow colors add meaning that is not there, and negative returns were silently drawn as zero.";
+  }
+}
+function fixes(){
+  const box=$("fixes"); box.innerHTML="";
+  const F=[
+   {t:"The cut-off axis",bad:"The rivalry bar looks several times taller than the other bar.",fix:"Starting the axis at zero shows the real gap: about "+Math.round((ST.soccer_by_rivalry.Yes[0]/ST.soccer_by_rivalry.No[0]-1)*100)+"% more fans.",
+    draw:(s,fixed)=>bars(s,[["Rivalry ("+ST.soccer_by_rivalry.Yes[1]+" games)",ST.soccer_by_rivalry.Yes[0],HI],["Other ("+ST.soccer_by_rivalry.No[1]+" games)",ST.soccer_by_rivalry.No[0],GREY]],fixed?{max:12000}:{min:8000,max:10400})},
+   {t:"Too many colors",bad:"Every bar has its own color, so nothing stands out.",fix:"Use grey for everything and one highlight color for the point you want the board to see.",
+    draw:(s,fixed)=>{ const it=Object.entries(ST.soccer_by_day_of_week).sort((a,b)=>b[1][0]-a[1][0]); bars(s,it.map((x,i)=>[x[0]+" ("+x[1][1]+")",x[1][0],fixed?(i===0?HI:GREY):RAINBOW[i]])); }},
+   {t:"No title, no labels",bad:"A line with no title or axis labels. What is it?",fix:"A title that states the insight plus labeled axes turns a picture into a message.",
+    draw:(s,fixed)=>{ const v=ST.bball_att.map(x=>x[3]); if(fixed){ line(s,v,ST.bball_att.map(x=>x[1].slice(5)),{max:6000}); s.appendChild(E("text",{x:58,y:16,"font-size":12,"font-weight":700,fill:INK},"Breakers home attendance by game (capacity 6,000)")); } else { const x0=20,w=480,h=230,y0=262,max=6000; let d=""; v.forEach((a,i)=>d+=(i?"L":"M")+(x0+w*i/(v.length-1))+","+(y0-h*a/max)); s.appendChild(E("path",{d,fill:"none",stroke:"#3B82F6","stroke-width":2})); } }},
+   {t:"A pie with twelve slices",bad:"Twelve sponsor fees in one pie: impossible to compare.",fix:"A sorted bar chart shows who pays the most at a glance.",
+    draw:(s,fixed)=>{ const it=ST.sponsors.map(x=>[x[0],x[2]]).sort((a,b)=>b[1]-a[1]); if(fixed) hbars(s,it.map(x=>[x[0],x[1]/1000,GREY]),v=>"$"+v+"k"); else pie(s,it,RAINBOW,150,150,110); }}
+  ];
+  F.forEach((f,k)=>{ const d=document.createElement("div"); d.className="panel"; d.innerHTML="<h3>"+(k+1)+". "+f.t+"</h3><p class='why' data-r='msg'>"+f.bad+"</p>";
+    const s=E("svg",{viewBox:"0 0 520 300",role:"img"}); d.appendChild(s); const btn=document.createElement("button"); btn.type="button"; btn.className="btn"; btn.textContent="Show the fix"; let fixed=false;
+    const redraw=()=>{ s.innerHTML=""; f.draw(s,fixed); d.querySelector("[data-r=msg]").textContent=fixed?f.fix:f.bad; btn.textContent=fixed?"Show the original":"Show the fix"; d.style.borderTop="5px solid "+(fixed?"#15803D":"#B91C1C"); };
+    btn.addEventListener("click",()=>{ fixed=!fixed; redraw(); }); d.appendChild(btn); box.appendChild(d); redraw(); });
+}
+const QUIZ=[
+ {q:"The general manager asks how ticket revenue changed month by month. Which chart?",o:["Pie chart","Line chart","Scatter plot","Twelve-slice pie"],a:1,e:"Change over time: a line chart."},
+ {q:"Marketing wants to know which promotion drew the most fans. Which chart?",o:["Bar chart sorted by attendance","Line chart","Scatter plot","Map"],a:0,e:"Comparing groups: sorted bars."},
+ {q:"The CFO asks whether higher prices went with fewer tickets sold. Which chart?",o:["Pie chart","Stacked bar","Scatter plot","Table of dates"],a:2,e:"A relationship between two numbers: a scatter plot."},
+ {q:"A bar chart's axis starts at 8,000 instead of 0. What is the risk?",o:["It uses too many colors","Small differences look huge","It hides the title","Nothing, it is fine"],a:1,e:"A cut-off axis on a bar chart exaggerates differences."},
+ {q:"Which chart title tells the best story?",o:["Attendance 2026","Chart 3","Fan giveaways added about 1,200 fans per game","Data from the ticket office"],a:2,e:"A good title states the insight, so the board knows what to look for."}
+];
+let qScore=0;
+function quiz(){ QUIZ.forEach((item,qi)=>{ const d=document.createElement("div"); d.className="quiz-q"; d.innerHTML="<b>"+(qi+1)+". "+item.q+"</b>"; const opts=document.createElement("div"); opts.className="opts"; const fb=document.createElement("div"); fb.className="feedback"; fb.hidden=true;
+  item.o.forEach((t,oi)=>{ const b=document.createElement("button"); b.type="button"; b.className="btn"; b.textContent=t; b.addEventListener("click",()=>{ if(d.dataset.done) return; d.dataset.done="1"; const ok=oi===item.a; if(ok){ qScore++; $("qScore").textContent=qScore; } b.classList.add(ok?"right":"wrong"); opts.children[item.a].classList.add("right"); fb.hidden=false; fb.className="feedback "+(ok?"ok":"bad"); fb.textContent=(ok?"Correct. ":"Not quite. ")+item.e; }); opts.appendChild(b); });
+  d.append(opts,fb); $("quizBox").appendChild(d); }); }
+document.querySelectorAll(".toggle button").forEach(b=>b.addEventListener("click",()=>{ team=b.dataset.team; document.querySelectorAll(".toggle button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false")); draw(); }));
+tabs(); draw(); fixes(); quiz();
+
+</script>
+</body>
+</html>

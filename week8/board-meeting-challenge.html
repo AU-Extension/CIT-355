@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Board Meeting Challenge</title>
+<meta name="description" content="CIT 355 Week 8 challenge: choose headlines and answer board questions about five Biscayne Bay slides.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:6px 0 14px}
+  .progress i{display:block;height:100%;background:var(--au-red);width:0;transition:width .3s}
+  .slide{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .slide svg{width:100%;height:auto;display:block}
+  .persona{display:flex;gap:12px;align-items:flex-start;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:14px}
+  .avatar{flex:none;width:42px;height:42px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:700}
+  .choice{display:block;width:100%;text-align:left;font:inherit;font-size:15px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;margin:8px 0;cursor:pointer;line-height:1.45}
+  .choice:hover{border-color:#C9CED6}
+  .choice[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink) inset}
+  .choice.best{background:var(--ok-soft);border-color:#86D19E}
+  .choice.wrongpick{background:var(--bad-soft);border-color:#F5C2C2}
+  .step-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:16px}
+  .note{font-size:13px;color:var(--muted);margin:6px 0 0}
+  .summary-row{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:14px;gap:10px}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 8 · Interactive B</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 8 · Challenge</span>
+    <h1>Board meeting challenge</h1>
+    <p class="lede">You are presenting five slides to the Biscayne Bay Sports Group board. For each slide, pick the headline that tells the story best, then answer the board member's tough question. The numbers come from the course data.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this challenge</summary>
+    <ol>
+      <li>Study the chart and the note under it.</li>
+      <li>Step 1: choose the best headline for the slide (8 points).</li>
+      <li>Step 2: read the board member's question and choose the strongest answer (12 points).</li>
+      <li>Press "Check my answers" to see why, then go to the next slide. Five slides, 100 points.</li>
+    </ol>
+  </details>
+
+  <section class="card" id="game">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center"><span class="pill" id="counter"></span><span class="score">Score: <span class="big" id="score">0</span> / 100</span></div>
+    <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+    <div class="grid two">
+      <div class="slide">
+        <h2 id="sTitle"></h2>
+        <svg id="chart" viewBox="0 0 560 300" role="img" aria-label="Slide chart"></svg>
+        <p class="note" id="note"></p>
+      </div>
+      <div>
+        <div class="step-label" style="margin-top:0">Step 1: the best headline</div>
+        <div id="heads"></div>
+        <div class="persona"><div class="avatar" id="av"></div><div><div style="font-size:13px;color:var(--muted)" id="role"></div><div style="font-weight:600" id="question"></div></div></div>
+        <div class="step-label">Step 2: your answer</div>
+        <div id="answers"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn primary" id="check" type="button" disabled>Check my answers</button>
+      <button class="btn" id="next" type="button" hidden>Next slide</button>
+    </div>
+    <div class="feedback" id="fb" hidden aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="final" hidden style="margin-top:16px">
+    <h2>Meeting summary</h2>
+    <div class="score"><span class="big" id="finalScore"></span><span>out of 100</span></div>
+    <p id="finalMsg"></p>
+    <div id="rows"></div>
+    <h3 style="margin-top:14px">What strong presenters do</h3>
+    <ul>
+      <li>Write headlines that state the insight and why it matters, not just the topic.</li>
+      <li>Say how much evidence sits behind a number (one game or six games?).</li>
+      <li>Separate "goes together" from "causes," and propose a test when it matters.</li>
+      <li>Never overpromise. A clear "it lowers the risk" beats a false "it guarantees."</li>
+    </ul>
+    <button class="btn primary" id="restart" type="button">Start over</button>
+  </section>
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+<script>
+const hasGSAP = typeof window.gsap !== "undefined";
+
+const SL = [{"who": "Owner", "role": "Elena Marrero, owner of the Biscayne Bay Sports Group", "title": "Attendance and empty seats", "chart": {"kind": "bars", "unit": "%", "items": [["Biscayne Bay FC fill rate", 71.4], ["Breakers fill rate", 82.0]], "max": 100, "note": "Average home crowd: Biscayne Bay FC 8,574 of 12,000 seats; Breakers 4,922 of 6,000 seats."}, "heads": [["The Breakers fill 82% of seats, Biscayne Bay FC only 71%: soccer has the most empty seats to sell", 1], ["Attendance chart, 2026 season", 0], ["Soccer draws more fans per game, so soccer has no attendance problem", 0], ["Basketball attendance is falling", 0]], "q": "Soccer gets more fans per game than basketball. Why are you worried about soccer?", "ans": [["Because the stadium is twice as big. 8,574 fans fill only 71% of 12,000 seats, so about 3,426 seats are empty at an average match. That is our biggest ticket opportunity.", 1], ["Because soccer fans spend less money than basketball fans.", 0], ["I am not worried about soccer, the chart was just for information.", 0], ["Because the AI tool told us soccer attendance is a problem.", 0]], "why": "A headline should state the insight and the business meaning. The best answer uses the numbers on the slide and connects them to revenue, without claims the data does not show."}, {"who": "Marketing director", "role": "Andrés Pacheco, marketing director", "title": "Which promotions work?", "chart": {"kind": "bars", "unit": "", "items": [["Kids free (1 games)", 9509], ["Fireworks (2 games)", 9344], ["Fan giveaway (6 games)", 9170], ["None (7 games)", 7954], ["Heritage night (2 games)", 7718]], "max": 12000, "note": "Biscayne Bay FC average home attendance by promotion. The number of games is in brackets."}, "heads": [["Fan giveaways drew about 1,216 more fans per game than matches with no promotion, across 6 games", 1], ["Kids free night is our best promotion with 9,509 fans", 0], ["Promotions do not matter for attendance", 0], ["Average attendance by promotion type", 0]], "q": "Kids free night had the highest crowd. Should we do it at every home match next season?", "ans": [["Not yet. It happened only once, so we cannot separate the promotion from the opponent, the day, or the weather. Let's test it at three or four matches of different kinds and compare.", 1], ["Yes, the data clearly proves it is the best promotion.", 0], ["No, promotions never work.", 0], ["Yes, and we should raise prices on those nights too.", 0]], "why": "One game is weak evidence. Fan giveaways were used 6 times, so that result is more trustworthy. Good analysts point out how much evidence sits behind each number."}, {"who": "Chief financial officer", "role": "Tomás Reyes, chief financial officer", "title": "Sponsor return on investment", "chart": {"kind": "hbars", "unit": "%", "items": [["Sol Energy Drinks", 121], ["Brickell Law Partners", 116], ["Bay Credit Union", 74], ["Palmetto Insurance", 71], ["FitLife Gyms", 21], ["Breeze Telecom", 8], ["Coral Auto Group", -3], ["Doral Logistics", -6], ["Calle Ocho Café", -9], ["Everglades Water", -12], ["Magic City Health", -16], ["Key Biscayne Resorts", -36]], "note": "Return on investment = (attributed sales minus annual fee) divided by annual fee."}, "heads": [["6 of 12 sponsors got back less in attributed sales than they paid; Key Biscayne Resorts is lowest at -36%", 1], ["All of our sponsors are profitable partners", 0], ["Sponsor data for 2026", 0], ["Bay Credit Union is our best sponsor because it pays the most", 0]], "q": "Coral Auto Group is at risk and pays $380,000 a year. Should we just let them go?", "ans": [["No. Their return is close to break-even (-3%), and they produced the most leads of any sponsor (2,197). I would renegotiate around activations that turn those leads into sales, and track it before renewal.", 1], ["Yes. A negative return means they are a bad partner.", 0], ["Yes, and we should tell other sponsors about their poor results.", 0], ["No, because they are a car company and fans like cars.", 0]], "why": "Bay Credit Union pays the most, but paying the most is not the same as the best return: Sol Energy Drinks returns 121%. The best answer looks at more than one measure, such as return and leads, before a big decision."}, {"who": "Ticketing director", "role": "Carla Benítez, ticketing director", "title": "Season ticket renewals", "chart": {"kind": "bars", "unit": "%", "items": [["Came to more than 10 games", 83], ["Came to 10 or fewer", 56], ["All holders", 72]], "max": 100, "note": "Season ticket holders who renewed. 170 of 235 holders renewed overall."}, "heads": [["Holders who came to more than 10 games renewed at 83%, versus 56% for those who came to 10 or fewer", 1], ["Renewal rates by group", 0], ["Attending more games causes fans to renew", 0], ["Only 72% of fans renewed, a disaster", 0]], "q": "How sure are you that getting holders to attend more games will raise renewals?", "ans": [["It is a strong pattern, but attending more and renewing could both come from being a bigger fan. I would test it: give a group of low-attendance holders an offer to come more often and compare their renewals with a similar group without the offer.", 1], ["Completely sure, the chart proves it.", 0], ["Not sure at all, charts cannot tell us anything.", 0], ["I asked an AI assistant and it said yes.", 0]], "why": "The third headline claims cause and effect, which a chart like this cannot prove. A small test with a comparison group is how a front office checks whether a plan really works."}, {"who": "Head coach", "role": "Coach Darnell Okafor, Breakers head coach", "title": "Workload and injuries", "chart": {"kind": "bars", "unit": "%", "items": [["Weeks with ratio above 1.3", 22], ["All other weeks", 1.9]], "max": 30, "note": "Share of player-weeks with an injury, both teams, weeks 4 to 12. 18 high-ratio weeks (4 injuries) and 216 other weeks (4 injuries)."}, "heads": [["Injuries were much more common after a sudden jump in training load (22% of weeks versus about 1.9%)", 1], ["Training load causes every injury", 0], ["Workload ratio chart", 0], ["Our players are injured too often", 0]], "q": "So if we keep every player's ratio under 1.3, we will have no injuries?", "ans": [["No. Half of the injuries (4 of 8) happened in normal weeks. Keeping jumps small should lower the risk, but the ratio is a warning signal we use together with the medical staff, not a guarantee.", 1], ["Yes, the data shows injuries only happen above 1.3.", 0], ["No, the ratio is useless, we should ignore it.", 0], ["Yes, as long as nobody plays more than 20 minutes.", 0]], "why": "The best answer respects what the data shows and what it does not. Overpromising to a coach destroys trust the first time a player gets hurt in a normal week."}];
+let i=0, score=0, hPick=null, aPick=null, results=[];
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+function E(t,a,x){ const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(x!=null) e.textContent=x; return e; }
+const fmt=n=>(Math.round(n*10)/10).toLocaleString("en-US");
+function shuffle(a){ const b=a.slice(); for(let k=b.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [b[k],b[j]]=[b[j],b[k]]; } return b; }
+function chart(c){
+  const s=$("chart"); s.innerHTML="";
+  if(c.kind==="bars"){
+    const x0=60,y0=240,h=210,w=480, max=c.max||Math.max(...c.items.map(d=>d[1]))*1.15, bw=w/c.items.length;
+    for(let k=0;k<=4;k++){ const v=max*k/4, y=y0-h*k/4; s.appendChild(E("line",{x1:x0,x2:550,y1:y,y2:y,stroke:"#E3E6EB"})); s.appendChild(E("text",{x:x0-6,y:y+4,"text-anchor":"end","font-size":11,fill:"#6B7280"},fmt(v)+c.unit)); }
+    c.items.forEach((d,k)=>{ const y=y0-h*d[1]/max; const r=E("rect",{x:x0+bw*k+bw*.18,y,width:bw*.64,height:y0-y,rx:4,fill:k===0?"#E1141E":"#94A3B8"}); s.appendChild(r); if(hasGSAP) gsap.from(r,{attr:{y:y0,height:0},duration:.5,delay:k*.06});
+      s.appendChild(E("text",{x:x0+bw*k+bw/2,y:y-6,"text-anchor":"middle","font-size":13,"font-weight":700,fill:"#16181D"},fmt(d[1])+c.unit));
+      const words=d[0].split(" "), half=Math.ceil(words.length/2);
+      s.appendChild(E("text",{x:x0+bw*k+bw/2,y:258,"text-anchor":"middle","font-size":11,fill:"#3B4250"},words.slice(0,half).join(" ")));
+      s.appendChild(E("text",{x:x0+bw*k+bw/2,y:272,"text-anchor":"middle","font-size":11,fill:"#3B4250"},words.slice(half).join(" "))); });
+  } else {
+    const x0=170,w=300,top=8,rh=Math.min(24,284/c.items.length), vals=c.items.map(d=>d[1]); const mn=Math.min(0,...vals), mx=Math.max(...vals); const sc=w/(mx-mn), zero=x0+(-mn)*sc;
+    s.appendChild(E("line",{x1:zero,x2:zero,y1:top,y2:top+rh*c.items.length,stroke:"#6B7280"}));
+    c.items.forEach((d,k)=>{ const v=d[1], y=top+rh*k, x=v>=0?zero:zero+v*sc; const r=E("rect",{x,y:y+3,width:Math.abs(v)*sc,height:rh-6,rx:3,fill:v<0?"#B91C1C":"#15803D"}); s.appendChild(r); if(hasGSAP) gsap.from(r,{attr:{width:0,x:zero},duration:.5,delay:k*.03});
+      s.appendChild(E("text",{x:x0-8,y:y+rh/2+4,"text-anchor":"end","font-size":11,fill:"#3B4250"},d[0]));
+      s.appendChild(E("text",{x:v>=0?x+Math.abs(v)*sc+4:zero+4,y:y+rh/2+4,"font-size":11,"font-weight":700,fill:v<0?"#B91C1C":"#16181D"},v+c.unit)); });
+  }
+}
+function opts(box,list,setter){ box.innerHTML=""; shuffle(list.map((x,k)=>k)).forEach(k=>{ const b=document.createElement("button"); b.type="button"; b.className="choice"; b.textContent=list[k][0]; b.dataset.k=k; b.setAttribute("aria-pressed","false");
+  b.addEventListener("click",()=>{ if($("check").dataset.done) return; setter(k); box.querySelectorAll(".choice").forEach(c=>c.setAttribute("aria-pressed",c===b?"true":"false")); $("check").disabled=!(hPick!==null&&aPick!==null); }); box.appendChild(b); }); }
+function show(){
+  const s=SL[i]; hPick=null; aPick=null;
+  $("counter").textContent="Slide "+(i+1)+" of "+SL.length+" · "+s.who; $("bar").style.width=(i/SL.length*100)+"%";
+  $("sTitle").textContent=s.title; chart(s.chart); $("note").textContent=s.chart.note||"";
+  $("av").textContent=s.who.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase(); $("role").textContent=s.role; $("question").textContent="“"+s.q+"”";
+  opts($("heads"),s.heads,k=>hPick=k); opts($("answers"),s.ans,k=>aPick=k);
+  $("fb").hidden=true; $("next").hidden=true; $("check").hidden=false; $("check").disabled=true; delete $("check").dataset.done;
+}
+$("check").addEventListener("click",()=>{
+  const s=SL[i]; $("check").dataset.done="1";
+  const hp=s.heads[hPick][1]?8:0, ap=s.ans[aPick][1]?12:0, pts=hp+ap; score+=pts; $("score").textContent=score; results.push([s.title,pts]);
+  [["heads",s.heads,hPick],["answers",s.ans,aPick]].forEach(([id,list,pk])=>$(id).querySelectorAll(".choice").forEach(c=>{ const k=+c.dataset.k; if(list[k][1]) c.classList.add("best"); else if(k===pk) c.classList.add("wrongpick"); }));
+  const fb=$("fb"); fb.hidden=false; fb.className="feedback "+(pts===20?"ok":(pts>0?"info":"bad"));
+  fb.innerHTML="<b>+"+pts+" points.</b> Headline "+(hp?"correct":"not the strongest")+", answer "+(ap?"correct":"not the strongest")+". "+s.why;
+  $("check").hidden=true; $("next").hidden=false; $("next").textContent=i===SL.length-1?"End the meeting":"Next slide"; $("next").focus();
+});
+$("next").addEventListener("click",()=>{ i++; if(i<SL.length) show(); else finish(); });
+function finish(){ $("bar").style.width="100%"; $("final").hidden=false; $("finalScore").textContent=score;
+  $("finalMsg").textContent=score>=85?"The board is convinced. Clear headlines and honest answers.":score>=60?"A solid meeting. Review the slides where you lost points before your final presentation.":"The board has doubts. Rework your headlines so they state the insight, and practice answering with evidence.";
+  $("rows").innerHTML=results.map(r=>"<div class='summary-row'><span>"+r[0]+"</span><span class='mono'>"+r[1]+" / 20</span></div>").join(""); $("final").scrollIntoView({behavior:"smooth"}); }
+$("restart").addEventListener("click",()=>{ i=0; score=0; results=[]; $("score").textContent=0; $("final").hidden=true; show(); $("game").scrollIntoView({behavior:"smooth"}); });
+show();
+
+</script>
+</body>
+</html>

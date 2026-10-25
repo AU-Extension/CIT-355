@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workload Monitor</title>
+<meta name="description" content="CIT 355 Week 7 interactive: compare weekly training load with the four-week average and test a plan for next week.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --au-red:#E1141E; --au-red-dark:#A3282B; --au-red-soft:#FDECEC;
+    --ink:#16181D; --ink-2:#3B4250; --muted:#6B7280; --line:#E3E6EB;
+    --bg:#F5F6F8; --card:#FFFFFF; --code-bg:#0F1722; --code-ink:#D7E3F4;
+    --net-blue:#2563EB; --net-green:#15803D; --net-amber:#B45309; --net-purple:#7C3AED; --net-teal:#0F766E;
+    --ok:#15803D; --ok-soft:#E7F6EC; --bad:#B91C1C; --bad-soft:#FDECEC; --warn:#B45309; --warn-soft:#FEF4E6;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 12px rgba(16,24,40,.06);
+    --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--au-red-dark)}
+  /* top bar with AU logo (logo PNG has wide padding, so it is cropped with a wrapper) */
+  .topbar{background:#fff;border-bottom:3px solid var(--au-red);}
+  .topbar-inner{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .au-logo{width:130px;height:36px;overflow:hidden;flex:none;display:block}
+  .au-logo img{width:145px;height:auto;margin:-28px 0 0 -8px;display:block}
+  .crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;border-left:1px solid var(--line);padding-left:16px}
+  .crumb b{color:var(--ink);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 16px 48px}
+  .hero{margin:4px 0 20px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--au-red-dark);background:var(--au-red-soft);padding:3px 10px;border-radius:999px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.15;margin:10px 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;margin:0 0 10px}
+  h3{font-size:16px;margin:0 0 8px}
+  .lede{color:var(--ink-2);max-width:760px;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:900px){.grid.two{grid-template-columns:1.4fr 1fr}}
+  details.howto{margin:0 0 16px}
+  details.howto summary{cursor:pointer;font-weight:600}
+  .btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .btn:hover{border-color:#C9CED6;background:#FAFAFB}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+  .btn.primary{background:var(--au-red);border-color:var(--au-red);color:#fff}
+  .btn.primary:hover{background:var(--au-red-dark);border-color:var(--au-red-dark)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  input[type=text],input[type=number],select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid #CBD2DA;border-radius:8px;background:#fff;color:var(--ink);min-width:0}
+  .mono,code,kbd{font-family:var(--mono)}
+  .cli{background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:13px;line-height:1.5;border-radius:10px;padding:14px 16px;overflow:auto;white-space:pre}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:#EEF1F5;color:var(--ink-2)}
+  .feedback{border-radius:10px;padding:12px 14px;margin-top:12px;font-size:15px}
+  .feedback.ok{background:var(--ok-soft);color:#14532D;border:1px solid #BBE5C8}
+  .feedback.bad{background:var(--bad-soft);color:#7F1D1D;border:1px solid #F5C2C2}
+  .feedback.info{background:#EEF4FF;color:#1E3A8A;border:1px solid #C7D7FE}
+  .score{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-weight:600}
+  .score .big{font-size:28px;color:var(--au-red-dark)}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+  table.data th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .scroll-x{overflow-x:auto}
+  svg text{font-family:var(--sans)}
+  footer.foot{max-width:1120px;margin:0 auto;padding:16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+  [hidden]{display:none!important}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:#fff;gap:2px}
+  .toggle button{font:inherit;font-size:14px;font-weight:600;border:0;background:transparent;padding:7px 16px;border-radius:999px;cursor:pointer;color:var(--ink-2)}
+  .toggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px}
+  .controls label{font-size:14px;font-weight:600}
+  .chartbox svg{width:100%;height:auto;display:block}
+  .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}
+  .kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .kpi .v{font-size:22px;font-weight:700;font-family:var(--mono)}
+  .zone{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+  .z-under{background:#E8F0FE;color:#1E40AF}.z-ok{background:var(--ok-soft);color:#14532D}.z-caution{background:var(--warn-soft);color:#7C2D12}.z-high{background:var(--bad-soft);color:#7F1D1D}
+  input[type=range]{width:100%;accent-color:var(--au-red)}
+  .slider-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+  table.data tr.sel td{background:var(--au-red-soft)}
+  table.data tbody tr{cursor:pointer}
+  table.data tbody tr:focus{outline:2px solid #93C5FD}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--ink-2);margin-top:6px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:14px;height:10px;border-radius:2px;display:inline-block}
+  .quiz-q{border-top:1px solid var(--line);padding:12px 0}
+  .quiz-q:first-of-type{border-top:0}
+  .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .opts .btn.right{background:var(--ok-soft);border-color:#BBE5C8}
+  .opts .btn.wrong{background:var(--bad-soft);border-color:#F5C2C2}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="au-logo" href="https://github.com/AU-Extension" target="_blank" rel="noopener" aria-label="Atlantis University">
+      <img src="https://raw.githubusercontent.com/AU-Extension/items/main/aulogo1.png" alt="Atlantis University">
+    </a>
+    <div class="crumb"><b>CIT 355</b> AI for Decision Making in Sports Management · Week 7 · Interactive A</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">Week 7 · Explorer</span>
+    <h1>Workload monitor</h1>
+    <p class="lede">See how much each Biscayne Bay player trained week by week, compare this week with the recent four-week average, and test how next week's plan changes the warning signal before you talk to the coach.</p>
+  </section>
+
+  <details class="howto card">
+    <summary>How to use this interactive</summary>
+    <ol>
+      <li>Pick a team (soccer or basketball), then pick a player from the list or click a row in the squad table.</li>
+      <li>Read the top chart: bars are each week's training load, the dark line is the four-week average, and a red cross marks a week with an injury.</li>
+      <li>Read the bottom chart: the workload ratio compares this week with the four-week average. Green is a typical week, amber and red mean a sudden jump.</li>
+      <li>Move the slider to plan week 13 and watch the ratio and the warning zone update.</li>
+      <li>Answer the four quick questions at the bottom to check your understanding.</li>
+    </ol>
+  </details>
+
+  <div class="card" style="margin-bottom:16px">
+    <h2>What is the workload ratio?</h2>
+    <p style="margin:0 0 8px">Training load is a single number for how hard a player worked in a week (here: minutes of training multiplied by how hard each session felt, on a 1 to 10 scale). The <b>workload ratio</b> divides this week's load by the average of the last four weeks, including this week.</p>
+    <p style="margin:0">A ratio near 1.0 means "about the same as usual." A ratio of 1.5 means this week was much heavier than the player is used to. Sports scientists treat sudden jumps as a warning sign for injury risk. In this tool the zones are: below 0.8 underloaded, 0.8 to 1.3 typical, 1.3 to 1.5 caution, above 1.5 high.</p>
+  </div>
+
+  <div class="grid two">
+    <section class="card">
+      <div class="controls">
+        <div class="toggle" role="group" aria-label="Team">
+          <button type="button" data-sport="Soccer" aria-pressed="true">Soccer: Biscayne Bay FC</button>
+          <button type="button" data-sport="Basketball" aria-pressed="false">Basketball: Breakers</button>
+        </div>
+        <label for="player">Player</label>
+        <select id="player"></select>
+      </div>
+      <h3 id="chartTitle">Weekly training load</h3>
+      <div class="chartbox"><svg id="loadChart" viewBox="0 0 720 300" role="img" aria-label="Weekly training load chart"></svg></div>
+      <div class="legend">
+        <span><i class="sw" style="background:#94A3B8"></i>Weekly load</span>
+        <span><i class="sw" style="background:#E1141E;opacity:.55"></i>Planned week 13</span>
+        <span><i class="sw" style="background:#16181D;height:3px"></i>Four-week average</span>
+        <span style="color:#B91C1C;font-weight:700">✚ Injury that week</span>
+      </div>
+      <h3 style="margin-top:18px">Workload ratio by week</h3>
+      <div class="chartbox"><svg id="ratioChart" viewBox="0 0 720 220" role="img" aria-label="Workload ratio chart with warning zones"></svg></div>
+    </section>
+
+    <aside class="card">
+      <h2 id="pName">Player</h2>
+      <div id="pMeta" class="pill"></div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Week 12 load</div><div class="v" id="k12"></div></div>
+        <div class="kpi"><div class="l">Four-week average</div><div class="v" id="kavg"></div></div>
+        <div class="kpi"><div class="l">Week 12 ratio</div><div class="v" id="kratio"></div></div>
+        <div class="kpi"><div class="l">Zone</div><div class="v" style="font-size:16px;padding-top:4px" id="kzone"></div></div>
+      </div>
+      <h3 style="margin-top:14px">Plan week 13</h3>
+      <label for="plan" class="sr" style="font-size:14px">Planned load for week 13: <b id="planVal"></b></label>
+      <input type="range" id="plan" min="1200" max="5200" step="50">
+      <div class="slider-row"><span>Light week</span><span>Very heavy week</span></div>
+      <div id="planOut" class="feedback info" aria-live="polite"></div>
+      <div class="feedback bad" style="font-size:14px"><b>Warning signal, not a diagnosis.</b> The ratio is a simple teaching tool. Real decisions combine it with medical staff, how the player feels, sleep, travel, and match importance.</div>
+    </aside>
+  </div>
+
+  <section class="card" style="margin-top:16px">
+    <h2 id="squadTitle">Squad overview, week 12</h2>
+    <p style="margin:0 0 10px;color:var(--ink-2)">Click a row to open that player. Sorted from highest to lowest ratio.</p>
+    <div class="scroll-x"><table class="data" id="squad"><thead><tr><th>Player</th><th>Position</th><th>Week 12 ratio</th><th>Zone</th><th>Weeks above 1.3</th><th>Injury weeks</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <h2>What does our own data say?</h2>
+    <p id="insight" style="margin:0"></p>
+  </section>
+
+  <section class="card" style="margin-top:16px" id="quiz">
+    <h2>Check your understanding</h2>
+    <div id="quizBox"></div>
+    <div class="score" style="margin-top:10px">Score: <span class="big" id="qScore">0</span> / 4</div>
+  </section>
+</main>
+
+<footer class="foot">Atlantis University · School of Information Technology · CIT 355 AI for Decision Making in Sports Management<div class="byline" style="margin-top:4px;font-weight:600;color:#3B4250;">By Professor De Leon</div></footer>
+<script>
+const hasGSAP = typeof window.gsap !== "undefined";
+
+const DATA = [{"id": "SP04", "name": "Adrián Dubois", "sport": "Soccer", "pos": "Defender", "loads": [2337, 2432, 2774, 2627, 2152, 2550, 2772, 2533, 5366, 2377, 2116, 2867], "inj": [], "sleep": [7.2, 6.6, 7.8, 7.9, 7.8, 8.5, 7.1, 7.8, 6.4, 7.8, 8.3, 7.3], "rpe": [4.2, 7.5, 6.9, 5.9, 5.3, 7.7, 5.5, 5.4, 5.1, 7.2, 6.3, 7.0]}, {"id": "SP05", "name": "Lukas Kovač", "sport": "Soccer", "pos": "Defender", "loads": [2527, 2822, 2976, 2793, 2376, 2200, 4635, 2544, 2588, 2683, 2840, 3046], "inj": [7], "sleep": [8.2, 7.9, 8.4, 6.3, 6.9, 8.4, 8.2, 6.4, 7.3, 7.1, 7.2, 8.0], "rpe": [4.6, 6.2, 4.0, 4.6, 4.9, 5.4, 5.1, 4.3, 6.0, 6.5, 4.4, 4.8]}, {"id": "SP06", "name": "Nikola Charles", "sport": "Soccer", "pos": "Defender", "loads": [2472, 2522, 2914, 2384, 2152, 3124, 4234, 2665, 2459, 2864, 2264, 2745], "inj": [], "sleep": [7.7, 7.6, 8.1, 6.8, 7.8, 6.5, 7.1, 8.4, 6.2, 8.0, 7.4, 6.1], "rpe": [6.4, 6.2, 5.3, 5.4, 5.2, 5.5, 6.4, 5.9, 7.7, 6.3, 4.2, 7.3]}, {"id": "SP07", "name": "Emilio Johnson", "sport": "Soccer", "pos": "Defender", "loads": [3315, 2393, 2921, 2796, 4097, 2945, 2857, 2553, 3122, 2316, 2388, 2559], "inj": [], "sleep": [6.9, 6.8, 7.4, 6.0, 6.6, 8.4, 6.3, 8.3, 8.1, 6.7, 6.8, 8.2], "rpe": [4.4, 6.0, 7.4, 7.2, 6.1, 4.9, 5.5, 4.2, 6.3, 5.2, 5.1, 5.8]}, {"id": "SP08", "name": "Carlos Dubois", "sport": "Soccer", "pos": "Defender", "loads": [2393, 2309, 2425, 2875, 2602, 4653, 2811, 2172, 2243, 2530, 2363, 2735], "inj": [], "sleep": [8.2, 7.9, 6.9, 8.3, 6.5, 6.8, 6.1, 6.7, 7.6, 6.6, 7.8, 8.4], "rpe": [5.5, 4.3, 7.3, 4.1, 5.2, 4.3, 4.2, 6.4, 4.1, 6.3, 4.7, 6.8]}, {"id": "SP09", "name": "Wilson Novak", "sport": "Soccer", "pos": "Defender", "loads": [2526, 2283, 2880, 3279, 2561, 3000, 2545, 4456, 2467, 2936, 2652, 2511], "inj": [], "sleep": [7.0, 7.7, 7.5, 8.5, 8.0, 7.1, 6.4, 8.3, 7.5, 8.5, 6.5, 7.9], "rpe": [6.5, 7.1, 5.0, 7.7, 7.2, 7.8, 6.6, 7.9, 6.2, 6.2, 4.4, 5.3]}, {"id": "SP10", "name": "Daniel Charles", "sport": "Soccer", "pos": "Defender", "loads": [2463, 2481, 2823, 2975, 2627, 2358, 3201, 2470, 4229, 2492, 2404, 3248], "inj": [5, 8], "sleep": [7.6, 7.1, 6.3, 7.8, 6.7, 6.3, 7.4, 8.3, 6.7, 7.6, 6.6, 6.9], "rpe": [4.6, 7.4, 6.7, 6.2, 4.6, 6.2, 5.7, 4.2, 5.5, 4.8, 4.4, 6.2]}, {"id": "SP11", "name": "Noah Santos", "sport": "Soccer", "pos": "Defender", "loads": [2246, 2334, 3163, 2679, 4052, 2395, 2492, 3058, 2769, 2334, 2466, 2642], "inj": [], "sleep": [6.5, 8.4, 8.3, 7.1, 6.4, 6.9, 7.1, 8.2, 8.4, 6.8, 6.7, 6.7], "rpe": [6.1, 7.0, 5.4, 5.7, 6.3, 7.4, 5.5, 4.0, 4.2, 5.2, 5.5, 5.5]}, {"id": "SP12", "name": "Lukas Sato", "sport": "Soccer", "pos": "Midfielder", "loads": [2985, 2831, 2418, 2951, 2818, 2641, 2978, 2568, 3649, 2843, 3062, 2674], "inj": [], "sleep": [6.2, 6.9, 6.5, 7.4, 8.0, 6.2, 6.0, 6.1, 7.5, 7.0, 7.3, 6.6], "rpe": [7.6, 6.0, 4.5, 7.3, 6.1, 6.7, 6.2, 6.1, 4.1, 5.4, 4.6, 5.6]}, {"id": "SP13", "name": "Omar Novak", "sport": "Soccer", "pos": "Midfielder", "loads": [2976, 2643, 3217, 3125, 3064, 2582, 3806, 2623, 2764, 2447, 2761, 2410], "inj": [], "sleep": [7.0, 6.2, 7.0, 6.0, 8.2, 6.1, 6.4, 6.5, 7.4, 6.6, 8.0, 7.5], "rpe": [7.7, 7.3, 6.7, 5.7, 4.5, 7.2, 6.1, 5.2, 5.2, 7.6, 6.8, 5.0]}, {"id": "SP14", "name": "Gabriel Joseph", "sport": "Soccer", "pos": "Midfielder", "loads": [2405, 2363, 3148, 2507, 2620, 2842, 3064, 3844, 2595, 2781, 2730, 2842], "inj": [], "sleep": [7.2, 6.6, 6.8, 7.7, 6.2, 6.9, 7.3, 6.1, 7.8, 7.3, 7.8, 6.6], "rpe": [5.3, 7.8, 7.9, 6.5, 4.1, 4.7, 5.7, 6.9, 7.1, 4.1, 6.4, 7.2]}, {"id": "SP15", "name": "Mateo Fonseca", "sport": "Soccer", "pos": "Midfielder", "loads": [2383, 2770, 2567, 2564, 3978, 2549, 2963, 3082, 2686, 2454, 2708, 2878], "inj": [], "sleep": [7.9, 7.7, 6.2, 6.2, 7.1, 7.9, 8.1, 8.1, 8.2, 6.3, 6.2, 6.8], "rpe": [5.7, 7.9, 4.6, 5.1, 4.9, 7.3, 6.5, 7.0, 4.9, 5.8, 4.8, 4.6]}, {"id": "SP16", "name": "Marcus Cruz", "sport": "Soccer", "pos": "Midfielder", "loads": [2219, 2580, 2784, 2571, 2746, 4564, 2838, 2734, 2569, 2959, 2730, 2996], "inj": [], "sleep": [8.5, 6.3, 6.9, 7.4, 8.0, 8.0, 7.3, 6.3, 6.3, 6.4, 6.5, 6.4], "rpe": [7.8, 4.3, 4.1, 6.0, 7.9, 7.9, 7.9, 4.7, 5.3, 7.5, 6.6, 5.3]}, {"id": "SP17", "name": "Josué Medina", "sport": "Soccer", "pos": "Midfielder", "loads": [2280, 2485, 2881, 2768, 3134, 3273, 2749, 2413, 2807, 2760, 2345, 2074], "inj": [9], "sleep": [7.1, 7.3, 7.9, 6.9, 7.4, 6.9, 6.9, 7.2, 8.2, 7.9, 6.9, 8.1], "rpe": [5.3, 6.1, 4.6, 6.1, 6.8, 4.2, 5.5, 4.6, 7.7, 7.9, 4.9, 4.0]}, {"id": "SP18", "name": "Yusuf Mendoza", "sport": "Soccer", "pos": "Midfielder", "loads": [3125, 2316, 2824, 2606, 2580, 3834, 2708, 3080, 3254, 2382, 2532, 2326], "inj": [8], "sleep": [6.3, 7.0, 6.9, 6.5, 8.4, 8.1, 6.3, 6.3, 7.3, 7.3, 6.0, 6.7], "rpe": [6.1, 7.7, 7.6, 8.0, 6.5, 5.1, 5.0, 5.3, 6.5, 6.1, 6.7, 5.4]}, {"id": "SP19", "name": "Andre Becker", "sport": "Soccer", "pos": "Midfielder", "loads": [2476, 2455, 2577, 2609, 4345, 2723, 2935, 2426, 2902, 2554, 2297, 2567], "inj": [], "sleep": [7.6, 7.4, 6.3, 6.5, 7.3, 8.0, 7.0, 8.2, 7.2, 8.0, 8.0, 7.3], "rpe": [6.3, 5.4, 6.3, 6.6, 7.4, 4.9, 6.0, 4.8, 7.5, 7.7, 6.2, 5.8]}, {"id": "BP01", "name": "Andre Novak", "sport": "Basketball", "pos": "Guard", "loads": [2649, 2444, 2065, 2724, 2363, 2161, 2538, 3278, 2314, 2067, 2334, 2513], "inj": [], "sleep": [6.0, 7.7, 6.6, 7.8, 7.0, 7.1, 7.5, 7.9, 8.3, 6.8, 8.4, 7.2], "rpe": [6.6, 4.6, 7.1, 5.9, 6.0, 5.8, 5.5, 6.9, 4.8, 5.0, 5.6, 5.2]}, {"id": "BP02", "name": "Kofi Rocha", "sport": "Basketball", "pos": "Guard", "loads": [1956, 2464, 2292, 2351, 4084, 2495, 2338, 2250, 2109, 2037, 1852, 2358], "inj": [5], "sleep": [7.1, 7.5, 6.2, 6.9, 6.0, 6.7, 6.8, 7.0, 7.0, 7.9, 7.2, 6.0], "rpe": [5.4, 5.5, 7.2, 5.9, 5.1, 4.2, 5.8, 7.4, 6.9, 4.7, 4.8, 4.2]}, {"id": "BP03", "name": "Hiro Pierre", "sport": "Basketball", "pos": "Guard", "loads": [2091, 2254, 2335, 2674, 2187, 3064, 2595, 2487, 2402, 2093, 2523, 2082], "inj": [2], "sleep": [6.7, 7.3, 7.1, 7.0, 7.2, 8.3, 6.3, 7.1, 7.9, 6.2, 6.1, 6.4], "rpe": [4.1, 6.0, 5.2, 5.1, 6.6, 5.3, 5.3, 5.4, 6.8, 7.8, 4.6, 5.2]}, {"id": "BP04", "name": "Josué Thompson", "sport": "Basketball", "pos": "Guard", "loads": [2535, 2064, 2138, 2195, 2790, 2440, 2283, 2671, 4150, 2568, 1895, 2038], "inj": [9], "sleep": [6.1, 6.8, 7.6, 7.3, 7.3, 6.7, 8.2, 7.1, 8.2, 6.5, 7.4, 8.4], "rpe": [5.3, 4.4, 4.6, 6.5, 6.8, 4.3, 4.7, 5.2, 5.6, 5.9, 5.8, 7.9]}, {"id": "BP05", "name": "Iván Thompson", "sport": "Basketball", "pos": "Guard", "loads": [2254, 2211, 2510, 2848, 1974, 2664, 4040, 2081, 2302, 2089, 2504, 2419], "inj": [1, 7], "sleep": [6.9, 6.7, 7.2, 8.3, 7.5, 6.9, 8.0, 6.9, 7.4, 6.3, 8.3, 6.3], "rpe": [6.1, 5.4, 7.9, 7.2, 5.7, 7.7, 5.1, 5.7, 6.2, 5.5, 7.4, 6.0]}, {"id": "BP06", "name": "Carlos Costa", "sport": "Basketball", "pos": "Forward", "loads": [2673, 2274, 2233, 2336, 3369, 2534, 2251, 1791, 1761, 2608, 2093, 2474], "inj": [], "sleep": [7.8, 8.1, 6.4, 8.4, 6.4, 6.2, 6.3, 8.3, 8.4, 7.1, 7.6, 7.5], "rpe": [5.1, 6.8, 4.0, 7.8, 7.9, 4.9, 4.1, 6.3, 7.5, 6.4, 6.5, 7.9]}, {"id": "BP07", "name": "Pierre Joseph", "sport": "Basketball", "pos": "Forward", "loads": [2320, 2506, 2140, 2179, 1986, 2735, 2119, 3322, 2624, 2197, 2616, 2404], "inj": [], "sleep": [6.9, 6.5, 6.3, 8.4, 8.2, 7.4, 7.0, 6.4, 6.4, 8.0, 6.2, 6.9], "rpe": [7.7, 4.9, 6.4, 7.1, 6.0, 6.0, 6.6, 5.0, 7.2, 7.2, 4.8, 5.7]}, {"id": "BP08", "name": "Isaiah Alvarez", "sport": "Basketball", "pos": "Forward", "loads": [1876, 2042, 2102, 1866, 2227, 2185, 2648, 2123, 3380, 2407, 2169, 2357], "inj": [], "sleep": [7.9, 6.2, 7.5, 6.8, 7.4, 7.1, 7.7, 6.7, 7.3, 6.5, 8.4, 6.2], "rpe": [5.5, 5.8, 4.3, 7.4, 6.3, 5.8, 7.8, 4.3, 6.2, 5.4, 7.6, 4.7]}, {"id": "BP09", "name": "Andrés Pereira", "sport": "Basketball", "pos": "Forward", "loads": [2101, 2330, 2130, 2566, 2212, 1940, 2378, 3911, 2734, 2368, 2131, 2754], "inj": [2], "sleep": [6.5, 7.3, 7.8, 7.6, 7.6, 6.9, 7.4, 8.2, 6.8, 6.3, 7.3, 7.3], "rpe": [7.9, 7.4, 5.0, 7.1, 4.3, 4.1, 7.5, 6.1, 4.1, 7.8, 5.6, 4.8]}, {"id": "BP10", "name": "Hiro Charles", "sport": "Basketball", "pos": "Forward", "loads": [2278, 2140, 2577, 2674, 2228, 2102, 1916, 2369, 2198, 2038, 1878, 2025], "inj": [], "sleep": [7.1, 7.5, 7.8, 6.2, 7.3, 6.9, 6.1, 6.7, 6.7, 6.8, 6.4, 7.3], "rpe": [4.3, 4.9, 5.2, 6.1, 5.5, 6.6, 7.7, 4.4, 5.4, 4.1, 4.0, 5.5]}];
+let sport = "Soccer", current = null;
+const fmt = n => Math.round(n).toLocaleString("en-US");
+function ratioAt(L, i){ if(i<3) return null; const a=(L[i-3]+L[i-2]+L[i-1]+L[i])/4; return L[i]/a; }
+function zone(r){ if(r==null) return ["No ratio yet","z-under"]; if(r<0.8) return ["Underloaded","z-under"]; if(r<=1.3) return ["Typical","z-ok"]; if(r<=1.5) return ["Caution","z-caution"]; return ["High","z-high"]; }
+function svgEl(tag, attrs, text){ const e=document.createElementNS("http://www.w3.org/2000/svg",tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(text!=null) e.textContent=text; return e; }
+const players = () => DATA.filter(p=>p.sport===sport);
+
+function fillSelect(){
+  const sel=document.getElementById("player"); sel.innerHTML="";
+  players().forEach(p=>{ const o=document.createElement("option"); o.value=p.id; o.textContent=p.name+" ("+p.pos+")"; sel.appendChild(o); });
+  current = players()[0]; sel.value=current.id;
+}
+function planRatio(L, plan){ const a=(L[9]+L[10]+L[11]+plan)/4; return plan/a; }
+
+function drawLoad(p, plan){
+  const s=document.getElementById("loadChart"); s.innerHTML="";
+  const W=720,H=300,ml=56,mr=14,mt=24,mb=40, n=13;
+  const vals=[...p.loads, plan]; const max=Math.max(5200, ...vals)*1.05;
+  const x=i=>ml+(W-ml-mr)*(i+0.5)/n, bw=(W-ml-mr)/n*0.62, y=v=>mt+(H-mt-mb)*(1-v/max);
+  for(let t=0;t<=5000;t+=1000){ s.appendChild(svgEl("line",{x1:ml,x2:W-mr,y1:y(t),y2:y(t),stroke:"#E3E6EB"})); s.appendChild(svgEl("text",{x:ml-8,y:y(t)+4,"text-anchor":"end","font-size":11,fill:"#6B7280"},t.toLocaleString("en-US"))); }
+  vals.forEach((v,i)=>{
+    const r=svgEl("rect",{x:x(i)-bw/2,y:y(v),width:bw,height:y(0)-y(v),rx:3,fill:i===12?"#E1141E":"#94A3B8",opacity:i===12?.55:1});
+    s.appendChild(r);
+    if(hasGSAP && i<12){ gsap.from(r,{attr:{y:y(0),height:0},duration:.45,delay:i*.025,ease:"power2.out"}); }
+    s.appendChild(svgEl("text",{x:x(i),y:H-mb+16,"text-anchor":"middle","font-size":11,fill:"#3B4250"},i===12?"13*":String(i+1)));
+    if(i<12 && p.inj.includes(i+1)) s.appendChild(svgEl("text",{x:x(i),y:y(v)-6,"text-anchor":"middle","font-size":16,"font-weight":700,fill:"#B91C1C"},"✚"));
+  });
+  let d=""; for(let i=3;i<13;i++){ const a=(vals[i-3]+vals[i-2]+vals[i-1]+vals[i])/4; d+=(i===3?"M":"L")+x(i)+","+y(a); }
+  s.appendChild(svgEl("path",{d,fill:"none",stroke:"#16181D","stroke-width":2.5}));
+  s.appendChild(svgEl("text",{x:ml,y:14,"font-size":11,fill:"#6B7280"},"Load units"));
+  s.appendChild(svgEl("text",{x:W-mr,y:H-6,"text-anchor":"end","font-size":11,fill:"#6B7280"},"Week (13* = your plan)"));
+}
+function drawRatio(p, plan){
+  const s=document.getElementById("ratioChart"); s.innerHTML="";
+  const W=720,H=220,ml=56,mr=14,mt=12,mb=32,n=13, lo=0.5, hi=1.9;
+  const x=i=>ml+(W-ml-mr)*(i+0.5)/n, y=v=>mt+(H-mt-mb)*(1-(Math.min(hi,Math.max(lo,v))-lo)/(hi-lo));
+  const bands=[[lo,0.8,"#E8F0FE","Underloaded"],[0.8,1.3,"#E7F6EC","Typical"],[1.3,1.5,"#FEF4E6","Caution"],[1.5,hi,"#FDECEC","High"]];
+  bands.forEach(b=>{ s.appendChild(svgEl("rect",{x:ml,y:y(b[1]),width:W-ml-mr,height:y(b[0])-y(b[1]),fill:b[2]})); s.appendChild(svgEl("text",{x:W-mr-6,y:y(b[1])+13,"text-anchor":"end","font-size":11,fill:"#3B4250"},b[3])); });
+  [0.8,1.0,1.3,1.5].forEach(t=>s.appendChild(svgEl("text",{x:ml-8,y:y(t)+4,"text-anchor":"end","font-size":11,fill:"#6B7280"},t.toFixed(1))));
+  const vals=[...p.loads, plan]; let d=""; const pts=[];
+  for(let i=3;i<13;i++){ const r=ratioAt(vals,i); pts.push([i,r]); }
+  pts.forEach(([i,r],k)=>{ if(i<12) d+=(k===0?"M":"L")+x(i)+","+y(r); });
+  s.appendChild(svgEl("path",{d,fill:"none",stroke:"#16181D","stroke-width":2}));
+  const last=pts[pts.length-2], pl=pts[pts.length-1];
+  s.appendChild(svgEl("path",{d:"M"+x(last[0])+","+y(last[1])+"L"+x(pl[0])+","+y(pl[1]),fill:"none",stroke:"#E1141E","stroke-width":2,"stroke-dasharray":"5 4"}));
+  pts.forEach(([i,r])=>{ const c=svgEl("circle",{cx:x(i),cy:y(r),r:i===12?6:4.5,fill:i===12?"#E1141E":"#16181D",stroke:"#fff","stroke-width":1.5}); const t=svgEl("title",{},"Week "+(i+1)+": ratio "+r.toFixed(2)); c.appendChild(t); s.appendChild(c); if(i<12 && p.inj.includes(i+1)) s.appendChild(svgEl("text",{x:x(i),y:y(r)-9,"text-anchor":"middle","font-size":14,"font-weight":700,fill:"#B91C1C"},"✚")); });
+  for(let i=0;i<13;i++) s.appendChild(svgEl("text",{x:x(i),y:H-10,"text-anchor":"middle","font-size":11,fill:"#3B4250"},i===12?"13*":String(i+1)));
+}
+function render(){
+  const p=current, L=p.loads, plan=+document.getElementById("plan").value;
+  document.getElementById("pName").textContent=p.name;
+  document.getElementById("pMeta").textContent=(p.sport==="Soccer"?"Biscayne Bay FC":"Biscayne Bay Breakers")+" · "+p.pos;
+  const avg=(L[8]+L[9]+L[10]+L[11])/4, r=L[11]/avg, z=zone(r);
+  document.getElementById("k12").textContent=fmt(L[11]);
+  document.getElementById("kavg").textContent=fmt(avg);
+  document.getElementById("kratio").textContent=r.toFixed(2);
+  document.getElementById("kzone").innerHTML='<span class="zone '+z[1]+'">'+z[0]+'</span>';
+  document.getElementById("planVal").textContent=fmt(plan);
+  const pr=planRatio(L,plan), pz=zone(pr), pavg=(L[9]+L[10]+L[11]+plan)/4;
+  let advice;
+  if(pr>1.5) advice="This plan is a big jump from what the player is used to. Consider spreading the extra work over two or three weeks, or adding a recovery day.";
+  else if(pr>1.3) advice="This plan is in the caution zone. It may be fine before an important match, but talk with the medical staff and watch sleep and soreness closely.";
+  else if(pr<0.8) advice="This is a light week. Useful for recovery after a heavy stretch, but several light weeks in a row can leave the player unprepared for a sudden heavy match.";
+  else advice="This plan keeps the player close to their usual load, a typical week.";
+  const box=document.getElementById("planOut");
+  box.className="feedback "+(pr>1.3?"bad":(pr<0.8?"info":"ok"));
+  box.innerHTML="<b>Week 13 plan:</b> "+fmt(plan)+" load units. New four-week average "+fmt(pavg)+", ratio <b>"+pr.toFixed(2)+"</b> <span class='zone "+pz[1]+"'>"+pz[0]+"</span><br>"+advice;
+  drawLoad(p,plan); drawRatio(p,plan);
+  document.querySelectorAll("#squad tbody tr").forEach(tr=>tr.classList.toggle("sel",tr.dataset.id===p.id));
+}
+function squad(){
+  document.getElementById("squadTitle").textContent=(sport==="Soccer"?"Biscayne Bay FC":"Biscayne Bay Breakers")+" squad overview, week 12";
+  const tb=document.querySelector("#squad tbody"); tb.innerHTML="";
+  const rows=players().map(p=>{ const L=p.loads; const r=L[11]/((L[8]+L[9]+L[10]+L[11])/4); let flags=0; for(let i=3;i<12;i++) if(ratioAt(L,i)>1.3) flags++; return {p,r,flags}; }).sort((a,b)=>b.r-a.r);
+  rows.forEach(({p,r,flags})=>{ const z=zone(r); const tr=document.createElement("tr"); tr.dataset.id=p.id; tr.tabIndex=0;
+    tr.innerHTML="<td>"+p.name+"</td><td>"+p.pos+"</td><td class='mono'>"+r.toFixed(2)+"</td><td><span class='zone "+z[1]+"'>"+z[0]+"</span></td><td>"+flags+"</td><td>"+(p.inj.length?p.inj.map(w=>"Week "+w).join(", "):"None")+"</td>";
+    const pick=()=>{ current=p; document.getElementById("player").value=p.id; resetPlan(); render(); };
+    tr.addEventListener("click",pick); tr.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); pick(); } });
+    tb.appendChild(tr); });
+}
+function insight(){
+  const calc=list=>{ let hiW=0,hiI=0,loW=0,loI=0; list.forEach(p=>{ for(let i=3;i<12;i++){ const r=ratioAt(p.loads,i), inj=p.inj.includes(i+1); if(r>1.3){hiW++; if(inj) hiI++;} else {loW++; if(inj) loI++;} } }); return {hiW,hiI,loW,loI}; };
+  const a=calc(DATA);
+  const pct=(x,y)=>y?Math.round(x/y*100):0;
+  document.getElementById("insight").innerHTML="Across all 26 players from week 4 to week 12, there were <b>"+a.hiW+"</b> player-weeks with a ratio above 1.3, and <b>"+a.hiI+"</b> of them ("+pct(a.hiI,a.hiW)+"%) had an injury. In the other <b>"+a.loW+"</b> player-weeks, only <b>"+a.loI+"</b> had an injury (about "+(a.loI/a.loW*100).toFixed(1)+"%). Big jumps did not cause every injury, and some injuries happened in normal weeks, which is exactly why the ratio is a warning signal and not a prediction.";
+}
+function resetPlan(){ const L=current.loads; const avg=(L[9]+L[10]+L[11])/3; document.getElementById("plan").value=Math.round(avg/50)*50; }
+document.querySelectorAll(".toggle button").forEach(b=>b.addEventListener("click",()=>{ sport=b.dataset.sport; document.querySelectorAll(".toggle button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false")); fillSelect(); squad(); resetPlan(); render(); }));
+document.getElementById("player").addEventListener("change",e=>{ current=DATA.find(p=>p.id===e.target.value); resetPlan(); render(); });
+document.getElementById("plan").addEventListener("input",render);
+
+const QUIZ=[
+ {q:"A player's load this week is 3,600 and the average of the last four weeks (including this week) is 2,400. What is the ratio?",o:["0.67","1.20","1.50","2.40"],a:2,e:"3,600 divided by 2,400 is 1.50, the edge of the high zone."},
+ {q:"Which ratio describes a typical week, about the same as usual?",o:["0.5","1.0","1.6","2.0"],a:1,e:"A ratio near 1.0 means this week matched the recent average."},
+ {q:"A star player is in the caution zone before the rivalry match. What is the most responsible first step?",o:["Bench the player for a month","Ignore it, the match is too important","Discuss it with medical staff and adjust training around the match","Post the ratio on social media"],a:2,e:"The ratio starts a conversation. Medical staff and coaches decide together, weighing match importance and the player's condition."},
+ {q:"Why is the ratio called a warning signal and not a prediction?",o:["Because it is always wrong","Because injuries also depend on many other things, and most high weeks do not end in injury","Because only coaches can read it","Because it ignores training load"],a:1,e:"In our data most high-ratio weeks did not end in injury, and some injuries came in normal weeks."}
+];
+let qScore=0;
+function quiz(){
+  const box=document.getElementById("quizBox");
+  QUIZ.forEach((item,qi)=>{
+    const d=document.createElement("div"); d.className="quiz-q";
+    d.innerHTML="<b>"+(qi+1)+". "+item.q+"</b>";
+    const opts=document.createElement("div"); opts.className="opts";
+    const fb=document.createElement("div"); fb.className="feedback"; fb.hidden=true;
+    item.o.forEach((t,oi)=>{ const b=document.createElement("button"); b.type="button"; b.className="btn"; b.textContent=t;
+      b.addEventListener("click",()=>{ if(d.dataset.done) return; d.dataset.done="1"; const ok=oi===item.a; if(ok){qScore++; document.getElementById("qScore").textContent=qScore;}
+        b.classList.add(ok?"right":"wrong"); opts.children[item.a].classList.add("right"); fb.hidden=false; fb.className="feedback "+(ok?"ok":"bad"); fb.textContent=(ok?"Correct. ":"Not quite. ")+item.e; });
+      opts.appendChild(b); });
+    d.appendChild(opts); d.appendChild(fb); box.appendChild(d);
+  });
+}
+fillSelect(); squad(); resetPlan(); render(); insight(); quiz();
+
+</script>
+</body>
+</html>
