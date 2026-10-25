@@ -1,0 +1,153 @@
+team,game_id,date,opponent,section,capacity,price,tickets_sold,revenue
+Biscayne Bay FC,S01,2026-03-07,Orlando Pines SC,Supporters End,2400,30.36,1592,48333
+Biscayne Bay FC,S01,2026-03-07,Orlando Pines SC,Lower Bowl,5200,46.0,3499,160954
+Biscayne Bay FC,S01,2026-03-07,Orlando Pines SC,Upper Deck,3800,28.75,2573,73973
+Biscayne Bay FC,S01,2026-03-07,Orlando Pines SC,Club Seats,600,109.25,439,47960
+Biscayne Bay FC,S03,2026-03-21,Atlanta Forge,Supporters End,2400,19.8,1956,38728
+Biscayne Bay FC,S03,2026-03-21,Atlanta Forge,Lower Bowl,5200,36.0,4292,154512
+Biscayne Bay FC,S03,2026-03-21,Atlanta Forge,Upper Deck,3800,27.5,2763,75982
+Biscayne Bay FC,S03,2026-03-21,Atlanta Forge,Club Seats,600,95.0,436,41420
+Biscayne Bay FC,S05,2026-04-04,Nashville Rhythm,Supporters End,2400,22.0,1883,41426
+Biscayne Bay FC,S05,2026-04-04,Nashville Rhythm,Lower Bowl,5200,48.0,3664,175872
+Biscayne Bay FC,S05,2026-04-04,Nashville Rhythm,Upper Deck,3800,22.5,3331,74947
+Biscayne Bay FC,S05,2026-04-04,Nashville Rhythm,Club Seats,600,85.5,498,42579
+Biscayne Bay FC,S07,2026-04-19,Houston Bayou SC,Supporters End,2400,22.0,1766,38852
+Biscayne Bay FC,S07,2026-04-19,Houston Bayou SC,Lower Bowl,5200,40.0,3583,143320
+Biscayne Bay FC,S07,2026-04-19,Houston Bayou SC,Upper Deck,3800,27.5,2212,60830
+Biscayne Bay FC,S07,2026-04-19,Houston Bayou SC,Club Seats,600,104.5,373,38978
+Biscayne Bay FC,S09,2026-05-02,Jacksonville Surf,Supporters End,2400,22.0,1707,37554
+Biscayne Bay FC,S09,2026-05-02,Jacksonville Surf,Lower Bowl,5200,48.0,3308,158784
+Biscayne Bay FC,S09,2026-05-02,Jacksonville Surf,Upper Deck,3800,25.0,2644,66100
+Biscayne Bay FC,S09,2026-05-02,Jacksonville Surf,Club Seats,600,114.0,373,42522
+Biscayne Bay FC,S11,2026-05-15,Memphis Blues SC,Supporters End,2400,26.4,1764,46569
+Biscayne Bay FC,S11,2026-05-15,Memphis Blues SC,Lower Bowl,5200,48.0,3426,164448
+Biscayne Bay FC,S11,2026-05-15,Memphis Blues SC,Upper Deck,3800,25.0,3011,75275
+Biscayne Bay FC,S11,2026-05-15,Memphis Blues SC,Club Seats,600,95.0,421,39995
+Biscayne Bay FC,S13,2026-05-30,Birmingham Iron,Supporters End,2400,24.2,1648,39881
+Biscayne Bay FC,S13,2026-05-30,Birmingham Iron,Lower Bowl,5200,44.0,3143,138292
+Biscayne Bay FC,S13,2026-05-30,Birmingham Iron,Upper Deck,3800,27.5,2471,67952
+Biscayne Bay FC,S13,2026-05-30,Birmingham Iron,Club Seats,600,95.0,405,38475
+Biscayne Bay FC,S15,2026-06-13,Richmond Rebels,Supporters End,2400,19.8,1767,34986
+Biscayne Bay FC,S15,2026-06-13,Richmond Rebels,Lower Bowl,5200,36.0,4175,150300
+Biscayne Bay FC,S15,2026-06-13,Richmond Rebels,Upper Deck,3800,27.5,2419,66522
+Biscayne Bay FC,S15,2026-06-13,Richmond Rebels,Club Seats,600,114.0,411,46854
+Biscayne Bay FC,S17,2026-06-27,Sarasota Keys FC,Supporters End,2400,24.2,1399,33855
+Biscayne Bay FC,S17,2026-06-27,Sarasota Keys FC,Lower Bowl,5200,48.0,2656,127488
+Biscayne Bay FC,S17,2026-06-27,Sarasota Keys FC,Upper Deck,3800,27.5,1847,50792
+Biscayne Bay FC,S17,2026-06-27,Sarasota Keys FC,Club Seats,600,95.0,357,33915
+Biscayne Bay FC,S18,2026-07-03,Orlando Pines SC,Supporters End,2400,30.36,1877,56985
+Biscayne Bay FC,S18,2026-07-03,Orlando Pines SC,Lower Bowl,5200,46.0,3897,179262
+Biscayne Bay FC,S18,2026-07-03,Orlando Pines SC,Upper Deck,3800,34.5,2375,81937
+Biscayne Bay FC,S18,2026-07-03,Orlando Pines SC,Club Seats,600,131.1,421,55193
+Biscayne Bay FC,S20,2026-07-19,Atlanta Forge,Supporters End,2400,26.4,1619,42741
+Biscayne Bay FC,S20,2026-07-19,Atlanta Forge,Lower Bowl,5200,48.0,2962,142176
+Biscayne Bay FC,S20,2026-07-19,Atlanta Forge,Upper Deck,3800,25.0,2445,61125
+Biscayne Bay FC,S20,2026-07-19,Atlanta Forge,Club Seats,600,114.0,363,41382
+Biscayne Bay FC,S22,2026-07-31,Nashville Rhythm,Supporters End,2400,26.4,1622,42820
+Biscayne Bay FC,S22,2026-07-31,Nashville Rhythm,Lower Bowl,5200,44.0,3334,146696
+Biscayne Bay FC,S22,2026-07-31,Nashville Rhythm,Upper Deck,3800,22.5,2964,66690
+Biscayne Bay FC,S22,2026-07-31,Nashville Rhythm,Club Seats,600,85.5,447,38218
+Biscayne Bay FC,S24,2026-08-15,Houston Bayou SC,Supporters End,2400,22.0,1462,32164
+Biscayne Bay FC,S24,2026-08-15,Houston Bayou SC,Lower Bowl,5200,40.0,3084,123360
+Biscayne Bay FC,S24,2026-08-15,Houston Bayou SC,Upper Deck,3800,30.0,1936,58080
+Biscayne Bay FC,S24,2026-08-15,Houston Bayou SC,Club Seats,600,85.5,411,35140
+Biscayne Bay FC,S26,2026-08-29,Jacksonville Surf,Supporters End,2400,19.8,1752,34689
+Biscayne Bay FC,S26,2026-08-29,Jacksonville Surf,Lower Bowl,5200,40.0,3346,133840
+Biscayne Bay FC,S26,2026-08-29,Jacksonville Surf,Upper Deck,3800,30.0,2007,60210
+Biscayne Bay FC,S26,2026-08-29,Jacksonville Surf,Club Seats,600,95.0,370,35150
+Biscayne Bay FC,S28,2026-09-16,Memphis Blues SC,Supporters End,2400,19.8,1364,27007
+Biscayne Bay FC,S28,2026-09-16,Memphis Blues SC,Lower Bowl,5200,40.0,3022,120880
+Biscayne Bay FC,S28,2026-09-16,Memphis Blues SC,Upper Deck,3800,25.0,2231,55775
+Biscayne Bay FC,S28,2026-09-16,Memphis Blues SC,Club Seats,600,95.0,367,34865
+Biscayne Bay FC,S30,2026-09-26,Birmingham Iron,Supporters End,2400,19.8,1863,36887
+Biscayne Bay FC,S30,2026-09-26,Birmingham Iron,Lower Bowl,5200,44.0,3536,155584
+Biscayne Bay FC,S30,2026-09-26,Birmingham Iron,Upper Deck,3800,25.0,2963,74075
+Biscayne Bay FC,S30,2026-09-26,Birmingham Iron,Club Seats,600,95.0,453,43035
+Biscayne Bay FC,S32,2026-10-11,Richmond Rebels,Supporters End,2400,26.4,1489,39309
+Biscayne Bay FC,S32,2026-10-11,Richmond Rebels,Lower Bowl,5200,48.0,3019,144912
+Biscayne Bay FC,S32,2026-10-11,Richmond Rebels,Upper Deck,3800,30.0,2054,61620
+Biscayne Bay FC,S32,2026-10-11,Richmond Rebels,Club Seats,600,104.5,394,41173
+Biscayne Bay FC,S34,2026-10-23,Sarasota Keys FC,Supporters End,2400,19.8,1575,31185
+Biscayne Bay FC,S34,2026-10-23,Sarasota Keys FC,Lower Bowl,5200,40.0,3297,131880
+Biscayne Bay FC,S34,2026-10-23,Sarasota Keys FC,Upper Deck,3800,25.0,2346,58650
+Biscayne Bay FC,S34,2026-10-23,Sarasota Keys FC,Club Seats,600,104.5,358,37411
+Biscayne Bay Breakers,B01,2026-11-07,Orlando Comets,Courtside,120,248.4,91,22604
+Biscayne Bay Breakers,B01,2026-11-07,Orlando Comets,Lower Level,2300,63.25,1882,119036
+Biscayne Bay Breakers,B01,2026-11-07,Orlando Comets,Upper Level,3300,35.42,2239,79305
+Biscayne Bay Breakers,B01,2026-11-07,Orlando Comets,Student Section,280,16.56,212,3510
+Biscayne Bay Breakers,B03,2026-11-13,Jacksonville Jets,Courtside,120,216.0,90,19440
+Biscayne Bay Breakers,B03,2026-11-13,Jacksonville Jets,Lower Level,2300,55.0,1926,105930
+Biscayne Bay Breakers,B03,2026-11-13,Jacksonville Jets,Upper Level,3300,30.8,2576,79340
+Biscayne Bay Breakers,B03,2026-11-13,Jacksonville Jets,Student Section,280,13.2,229,3022
+Biscayne Bay Breakers,B05,2026-11-21,Charlotte Hornet Hall,Courtside,120,162.0,82,13284
+Biscayne Bay Breakers,B05,2026-11-21,Charlotte Hornet Hall,Lower Level,2300,49.5,1657,82021
+Biscayne Bay Breakers,B05,2026-11-21,Charlotte Hornet Hall,Upper Level,3300,25.2,2515,63378
+Biscayne Bay Breakers,B05,2026-11-21,Charlotte Hornet Hall,Student Section,280,10.8,199,2149
+Biscayne Bay Breakers,B07,2026-11-28,Birmingham Steel,Courtside,120,162.0,86,13932
+Biscayne Bay Breakers,B07,2026-11-28,Birmingham Steel,Lower Level,2300,66.0,1474,97284
+Biscayne Bay Breakers,B07,2026-11-28,Birmingham Steel,Upper Level,3300,33.6,2061,69249
+Biscayne Bay Breakers,B07,2026-11-28,Birmingham Steel,Student Section,280,13.2,208,2745
+Biscayne Bay Breakers,B09,2026-12-05,Memphis Kings,Courtside,120,198.0,77,15246
+Biscayne Bay Breakers,B09,2026-12-05,Memphis Kings,Lower Level,2300,60.5,1506,91113
+Biscayne Bay Breakers,B09,2026-12-05,Memphis Kings,Upper Level,3300,28.0,2387,66836
+Biscayne Bay Breakers,B09,2026-12-05,Memphis Kings,Student Section,280,10.8,218,2354
+Biscayne Bay Breakers,B11,2026-12-12,Orlando Comets,Courtside,120,186.3,100,18630
+Biscayne Bay Breakers,B11,2026-12-12,Orlando Comets,Lower Level,2300,56.92,2022,115092
+Biscayne Bay Breakers,B11,2026-12-12,Orlando Comets,Upper Level,3300,28.98,2867,83085
+Biscayne Bay Breakers,B11,2026-12-12,Orlando Comets,Student Section,280,13.8,224,3091
+Biscayne Bay Breakers,B13,2026-12-19,Jacksonville Jets,Courtside,120,180.0,98,17640
+Biscayne Bay Breakers,B13,2026-12-19,Jacksonville Jets,Lower Level,2300,55.0,1921,105655
+Biscayne Bay Breakers,B13,2026-12-19,Jacksonville Jets,Upper Level,3300,25.2,2890,72828
+Biscayne Bay Breakers,B13,2026-12-19,Jacksonville Jets,Student Section,280,14.4,197,2836
+Biscayne Bay Breakers,B15,2026-12-26,Charlotte Hornet Hall,Courtside,120,216.0,101,21816
+Biscayne Bay Breakers,B15,2026-12-26,Charlotte Hornet Hall,Lower Level,2300,66.0,1763,116358
+Biscayne Bay Breakers,B15,2026-12-26,Charlotte Hornet Hall,Upper Level,3300,28.0,2843,79604
+Biscayne Bay Breakers,B15,2026-12-26,Charlotte Hornet Hall,Student Section,280,10.8,240,2592
+Biscayne Bay Breakers,B17,2027-01-02,Birmingham Steel,Courtside,120,216.0,87,18792
+Biscayne Bay Breakers,B17,2027-01-02,Birmingham Steel,Lower Level,2300,66.0,1574,103884
+Biscayne Bay Breakers,B17,2027-01-02,Birmingham Steel,Upper Level,3300,28.0,2755,77140
+Biscayne Bay Breakers,B17,2027-01-02,Birmingham Steel,Student Section,280,10.8,234,2527
+Biscayne Bay Breakers,B19,2027-01-09,Memphis Kings,Courtside,120,180.0,94,16920
+Biscayne Bay Breakers,B19,2027-01-09,Memphis Kings,Lower Level,2300,66.0,1556,102696
+Biscayne Bay Breakers,B19,2027-01-09,Memphis Kings,Upper Level,3300,28.0,2440,68320
+Biscayne Bay Breakers,B19,2027-01-09,Memphis Kings,Student Section,280,12.0,215,2580
+Biscayne Bay Breakers,B21,2027-01-16,Orlando Comets,Courtside,120,248.4,95,23598
+Biscayne Bay Breakers,B21,2027-01-16,Orlando Comets,Lower Level,2300,56.92,2132,121353
+Biscayne Bay Breakers,B21,2027-01-16,Orlando Comets,Upper Level,3300,38.64,1999,77241
+Biscayne Bay Breakers,B21,2027-01-16,Orlando Comets,Student Section,280,16.56,241,3990
+Biscayne Bay Breakers,B23,2027-01-22,Jacksonville Jets,Courtside,120,162.0,120,19440
+Biscayne Bay Breakers,B23,2027-01-22,Jacksonville Jets,Lower Level,2300,55.0,2300,126500
+Biscayne Bay Breakers,B23,2027-01-22,Jacksonville Jets,Upper Level,3300,33.6,2544,85478
+Biscayne Bay Breakers,B23,2027-01-22,Jacksonville Jets,Student Section,280,12.0,270,3240
+Biscayne Bay Breakers,B25,2027-01-29,Charlotte Hornet Hall,Courtside,120,180.0,96,17280
+Biscayne Bay Breakers,B25,2027-01-29,Charlotte Hornet Hall,Lower Level,2300,55.0,1864,102520
+Biscayne Bay Breakers,B25,2027-01-29,Charlotte Hornet Hall,Upper Level,3300,25.2,2821,71089
+Biscayne Bay Breakers,B25,2027-01-29,Charlotte Hornet Hall,Student Section,280,12.0,206,2472
+Biscayne Bay Breakers,B27,2027-02-05,Birmingham Steel,Courtside,120,198.0,89,17622
+Biscayne Bay Breakers,B27,2027-02-05,Birmingham Steel,Lower Level,2300,60.5,1697,102668
+Biscayne Bay Breakers,B27,2027-02-05,Birmingham Steel,Upper Level,3300,30.8,2264,69731
+Biscayne Bay Breakers,B27,2027-02-05,Birmingham Steel,Student Section,280,10.8,227,2451
+Biscayne Bay Breakers,B29,2027-02-13,Memphis Kings,Courtside,120,180.0,80,14400
+Biscayne Bay Breakers,B29,2027-02-13,Memphis Kings,Lower Level,2300,60.5,1477,89358
+Biscayne Bay Breakers,B29,2027-02-13,Memphis Kings,Upper Level,3300,25.2,2476,62395
+Biscayne Bay Breakers,B29,2027-02-13,Memphis Kings,Student Section,280,12.0,186,2232
+Biscayne Bay Breakers,B31,2027-02-20,Orlando Comets,Courtside,120,207.0,89,18423
+Biscayne Bay Breakers,B31,2027-02-20,Orlando Comets,Lower Level,2300,75.9,1578,119770
+Biscayne Bay Breakers,B31,2027-02-20,Orlando Comets,Upper Level,3300,32.2,2278,73351
+Biscayne Bay Breakers,B31,2027-02-20,Orlando Comets,Student Section,280,15.18,232,3521
+Biscayne Bay Breakers,B33,2027-02-27,Jacksonville Jets,Courtside,120,162.0,91,14742
+Biscayne Bay Breakers,B33,2027-02-27,Jacksonville Jets,Lower Level,2300,55.0,1633,89815
+Biscayne Bay Breakers,B33,2027-02-27,Jacksonville Jets,Upper Level,3300,33.6,1753,58900
+Biscayne Bay Breakers,B33,2027-02-27,Jacksonville Jets,Student Section,280,12.0,189,2268
+Biscayne Bay Breakers,B35,2027-03-05,Charlotte Hornet Hall,Courtside,120,162.0,98,15876
+Biscayne Bay Breakers,B35,2027-03-05,Charlotte Hornet Hall,Lower Level,2300,49.5,1943,96178
+Biscayne Bay Breakers,B35,2027-03-05,Charlotte Hornet Hall,Upper Level,3300,33.6,2260,75936
+Biscayne Bay Breakers,B35,2027-03-05,Charlotte Hornet Hall,Student Section,280,13.2,240,3168
+Biscayne Bay Breakers,B37,2027-03-13,Birmingham Steel,Courtside,120,162.0,120,19440
+Biscayne Bay Breakers,B37,2027-03-13,Birmingham Steel,Lower Level,2300,66.0,1866,123156
+Biscayne Bay Breakers,B37,2027-03-13,Birmingham Steel,Upper Level,3300,25.2,3300,83160
+Biscayne Bay Breakers,B37,2027-03-13,Birmingham Steel,Student Section,280,10.8,280,3024
+Biscayne Bay Breakers,B39,2027-03-19,Memphis Kings,Courtside,120,198.0,99,19602
+Biscayne Bay Breakers,B39,2027-03-19,Memphis Kings,Lower Level,2300,55.0,1843,101365
+Biscayne Bay Breakers,B39,2027-03-19,Memphis Kings,Upper Level,3300,30.8,2468,76014
+Biscayne Bay Breakers,B39,2027-03-19,Memphis Kings,Student Section,280,12.0,240,2880

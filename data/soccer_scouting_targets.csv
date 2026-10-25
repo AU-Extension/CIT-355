@@ -1,0 +1,31 @@
+target_id,name,position,age,current_league,minutes,goals_per90,assists_per90,xg_per90,key_passes_per90,tackles_per90,pass_completion_pct,injury_days_last_2yrs,transfer_fee,salary_ask
+ST01,Andre Rojas,Defender,29,MLS NEXT Pro,2063,0.05,0.05,0.06,1.91,1.8,91,10,300000,200000
+ST02,Iván Haddad,Forward,30,Colombian Primera,2155,0.34,0.26,0.39,1.33,0.59,81,0,150000,90000
+ST03,Jonas Santos,Forward,20,MLS NEXT Pro,1470,0.34,0.1,0.41,1.17,0.96,78,10,50000,350000
+ST04,Felipe Delgado,Midfielder,18,Norwegian Eliteserien,2605,0.26,0.13,0.21,1.23,2.94,82,45,800000,90000
+ST05,Thiago Reyes,Forward,33,Brazilian Serie B,1359,0.54,0.09,0.58,1.82,1.03,75,0,0,160000
+ST06,Isaiah Rojas,Forward,22,Belgian First Division B,2200,0.39,0.1,0.44,0.56,1.06,82,90,300000,200000
+ST07,Samuel Medina,Forward,19,Norwegian Eliteserien,942,0.65,0.18,0.52,2.14,1.14,77,45,1200000,350000
+ST08,Emeka Pereira,Midfielder,27,Colombian Primera,1000,0.13,0.12,0.12,0.36,1.49,72,90,1200000,90000
+ST09,Stefan Williams,Defender,26,Colombian Primera,935,0.06,0.03,0.05,1.2,3.07,76,0,800000,200000
+ST10,Daniel Laurent,Defender,26,Colombian Primera,1711,0.03,0.06,0.03,0.98,1.42,72,21,500000,200000
+ST11,Jordan Adeyemi,Midfielder,29,Belgian First Division B,2820,0.17,0.17,0.16,1.11,1.22,80,45,50000,120000
+ST12,Gabriel Cruz,Forward,29,Norwegian Eliteserien,1718,0.33,0.3,0.27,1.08,0.35,74,10,150000,90000
+ST13,Andre Silva,Defender,20,Norwegian Eliteserien,2650,0.06,0.11,0.07,0.48,1.78,76,10,300000,160000
+ST14,Malik Haddad,Midfielder,21,Colombian Primera,2090,0.22,0.22,0.25,0.57,2.22,77,0,0,260000
+ST15,Gabriel Ortega,Midfielder,29,Norwegian Eliteserien,2090,0.19,0.16,0.18,1.05,2.76,77,21,50000,160000
+ST16,Rafael Baptiste,Forward,29,Belgian First Division B,1766,0.5,0.27,0.42,2.42,0.62,83,90,150000,160000
+ST17,Bruno Petrov,Midfielder,26,Belgian First Division B,1892,0.11,0.25,0.09,2.57,2.7,82,90,800000,260000
+ST18,Malik Williams,Midfielder,18,MLS NEXT Pro,1621,0.23,0.27,0.24,0.97,1.59,75,10,150000,350000
+ST19,Adrián Miller,Forward,20,Belgian First Division B,2212,0.66,0.19,0.68,2.39,0.42,84,150,0,90000
+ST20,Isaiah Mendoza,Forward,28,USL Championship,2814,0.56,0.14,0.52,1.55,1.05,77,0,150000,160000
+ST21,Malik Brown,Midfielder,26,Colombian Primera,1314,0.18,0.1,0.15,0.3,0.81,65,0,0,260000
+ST22,Mateo Brown,Forward,27,Belgian First Division B,1077,0.71,0.2,0.8,1.51,0.7,79,0,300000,120000
+ST23,Santiago Reyes,Midfielder,31,MLS NEXT Pro,1479,0.14,0.08,0.15,2.04,0.63,77,90,800000,200000
+ST24,Kenji Morales,Forward,30,USL Championship,1355,0.59,0.13,0.51,0.44,0.85,79,0,150000,90000
+ST25,Yusuf Fonseca,Defender,32,Liga MX Expansion,981,0.08,0.04,0.07,2.48,2.99,87,45,150000,160000
+ST26,Jordan Silva,Midfielder,21,MLS NEXT Pro,1864,0.06,0.26,0.06,1.0,2.62,80,0,150000,200000
+ST27,Jamal Pereira,Forward,24,Colombian Primera,2401,0.71,0.1,0.61,1.29,0.43,80,0,800000,160000
+ST28,Omar Delgado,Defender,31,Belgian First Division B,2027,0.04,0.04,0.04,2.28,2.68,75,21,0,120000
+ST29,Elijah Miller,Midfielder,32,Brazilian Serie B,2002,0.06,0.27,0.05,0.56,1.01,76,21,1200000,160000
+ST30,Isaiah Herrera,Midfielder,23,Brazilian Serie B,1084,0.24,0.11,0.27,1.07,2.33,83,21,500000,120000

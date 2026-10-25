@@ -1,0 +1,27 @@
+player_id,name,position,age,minutes,goals,assists,xg,pass_completion_pct,tackles,interceptions,saves,annual_salary,contract_end
+SP01,Daniel Haddad,Goalkeeper,33,916,0,0,0.1,69,1,1,24,220000,2027
+SP02,Tyler Robinson,Goalkeeper,29,2308,0,0,0.1,76,2,5,85,234000,2027
+SP03,Iván Alvarez,Goalkeeper,29,1208,0,0,0.1,66,0,3,44,234000,2027
+SP04,Adrián Dubois,Defender,21,1443,1,1,1.18,87,24,19,0,600000,2026
+SP05,Lukas Kovač,Defender,28,1226,1,1,0.96,81,31,26,0,143000,2027
+SP06,Nikola Charles,Defender,32,2634,1,2,1.27,86,53,53,0,420000,2027
+SP07,Emilio Johnson,Defender,32,1442,1,1,1.28,73,38,32,0,300000,2027
+SP08,Carlos Dubois,Defender,25,1579,1,1,1.09,86,49,25,0,546000,2027
+SP09,Wilson Novak,Defender,19,666,0,1,0.1,79,21,12,0,140000,2027
+SP10,Daniel Charles,Defender,28,1279,1,1,1.39,86,28,16,0,234000,2026
+SP11,Noah Santos,Defender,26,903,1,1,0.93,81,29,13,0,390000,2027
+SP12,Lukas Sato,Midfielder,32,1247,3,3,2.83,85,27,15,0,600000,2027
+SP13,Omar Novak,Midfielder,24,1025,1,1,1.28,79,29,14,0,300000,2028
+SP14,Gabriel Joseph,Midfielder,19,2705,5,6,5.65,81,55,25,0,600000,2027
+SP15,Mateo Fonseca,Midfielder,22,1595,2,5,1.72,84,41,21,0,85000,2029
+SP16,Marcus Cruz,Midfielder,30,1453,3,4,2.74,78,44,11,0,286000,2027
+SP17,Josué Medina,Midfielder,24,2147,3,4,3.27,91,34,24,0,180000,2027
+SP18,Yusuf Mendoza,Midfielder,30,829,2,2,2.44,86,21,10,0,234000,2026
+SP19,Andre Becker,Midfielder,31,1307,2,2,1.77,83,32,10,0,300000,2029
+SP20,Gabriel Alvarez,Forward,27,2791,17,7,16.72,77,22,6,0,110500,2027
+SP21,Josué Robinson,Forward,31,2449,13,3,11.88,89,26,7,0,85000,2026
+SP22,Jamal Wilson,Forward,24,1357,8,2,7.61,77,7,4,0,300000,2029
+SP23,Pierre Pereira,Forward,20,1864,12,6,11.9,73,15,5,0,85000,2027
+SP24,Josué Sato,Forward,29,913,4,1,4.29,74,4,2,0,390000,2028
+SP25,Kenji Fonseca,Forward,28,836,5,3,5.97,73,8,2,0,110500,2026
+SP26,Hiro Cruz,Forward,34,2178,6,5,7.48,78,22,6,0,140000,2027

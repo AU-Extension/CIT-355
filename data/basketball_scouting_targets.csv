@@ -1,0 +1,25 @@
+target_id,name,position,age,current_league,games_played,points_per36,rebounds_per36,assists_per36,fg_pct,three_pt_pct,turnovers_per36,injury_games_missed_last_2yrs,salary_ask
+BT01,Thiago Charles,Guard,19,French LNB,24,19.3,4.8,6.7,42.2,36.3,2.3,0,55000
+BT02,Stefan Joseph,Center,20,Australian NBL,27,13.7,4.0,1.3,54.6,19.7,3.6,30,70000
+BT03,Yusuf Vargas,Center,22,Spanish ACB,36,19.4,12.3,1.9,58.1,25.6,2.6,18,70000
+BT04,Omar Becker,Forward,24,NCAA Division I,26,17.1,10.6,3.7,39.3,39.9,2.7,18,150000
+BT05,Gabriel Johnson,Center,30,Puerto Rico BSN,27,23.9,4.6,3.8,55.0,24.6,3.2,0,110000
+BT06,Isaiah Santos,Center,19,NCAA Division I,30,22.6,5.9,3.5,53.6,29.5,3.1,0,110000
+BT07,Daniel Rojas,Center,32,French LNB,31,11.8,8.1,3.5,52.9,24.3,3.0,0,70000
+BT08,Omar Pierre,Forward,23,Spanish ACB,31,13.3,10.3,3.7,49.8,32.8,1.7,0,150000
+BT09,Joaquín Petrov,Forward,27,Puerto Rico BSN,24,13.7,8.7,3.4,52.9,24.1,2.0,18,110000
+BT10,Bryce Castillo,Center,22,Australian NBL,29,20.9,4.0,3.9,59.2,22.5,2.0,18,55000
+BT11,Josué Tanaka,Forward,25,Spanish ACB,34,20.0,6.6,3.3,48.3,31.1,2.2,9,90000
+BT12,Ricardo Ibarra,Forward,29,French LNB,22,19.0,5.2,3.4,47.0,38.0,1.8,0,90000
+BT13,Marcus Costa,Guard,22,G League,31,16.9,3.8,4.1,34.9,27.9,2.2,18,55000
+BT14,Marcus Mendoza,Guard,25,Puerto Rico BSN,27,18.5,5.8,4.9,37.5,41.6,2.0,30,110000
+BT15,Joaquín Medina,Forward,23,Spanish ACB,25,23.4,12.1,2.6,44.2,29.3,3.7,0,90000
+BT16,Aleksandar Reyes,Guard,25,Spanish ACB,20,25.0,4.2,7.8,46.6,36.8,2.1,30,150000
+BT17,Hiro Medina,Center,23,Australian NBL,30,13.0,10.4,2.9,48.0,20.9,1.5,0,55000
+BT18,Marcus Laurent,Forward,26,G League,23,20.2,9.7,1.8,44.9,44.9,1.4,9,110000
+BT19,Iván Ibarra,Forward,23,Mexican LNBP,28,25.7,6.5,3.4,49.9,35.5,1.7,18,70000
+BT20,Bruno Guerrero,Center,31,Spanish ACB,24,20.7,11.3,3.7,56.0,28.1,3.0,30,110000
+BT21,Cameron Haddad,Center,19,Mexican LNBP,23,18.3,11.8,1.7,55.5,29.4,3.4,0,55000
+BT22,Rafael Alvarez,Center,20,Australian NBL,32,10.6,10.1,2.0,57.8,22.7,3.1,0,70000
+BT23,Bruno Castillo,Forward,20,NCAA Division I,22,20.6,5.8,3.2,46.7,38.1,2.0,18,200000
+BT24,Carlos Mendoza,Center,19,Mexican LNBP,23,21.1,8.0,1.8,53.5,28.3,2.4,18,55000

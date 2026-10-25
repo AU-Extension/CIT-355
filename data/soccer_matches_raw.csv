@@ -1,0 +1,36 @@
+match_id,date,day_of_week,kickoff,opponent,home_away,rivalry,result,goals_for,goals_against,xg_for,xg_against,possession_pct,shots,shots_against,weather,promotion,attendance,avg_ticket_price
+S01,2026-03-07,Saturday,7:30 PM,Orlando Pines SC,Home,Yes,L,0,2,0.94,1.86,57,16,13,Sunny,Fireworks,9631,50
+S02,2026-03-18,Wednesday,7:30 PM,Tampa Harbor FC,Away,No,W,2,1,1.82,1.36,47,24,18,Sunny,,,
+S03,2026-03-21,Saturday,7:30 PM,Atlanta Forge,Home,No,W,3,1,1.61,1.36,54,18,15,Clear night,Fan giveaway,9368,42
+S04,2026-03-29,Sunday,5:00 PM,charlotte crowns ,Away,No,W,1,0,0.9,0.57,54,8,9,Sunny,,,
+S05,2026-04-04,Saturday,7:30 PM,Nashville Rhythm,Home,No,W,3,0,0.83,1.1,57,10,14,Clear night,Kids free,9509,42
+S06,04/15/2026,Wednesday,7:30 PM,Austin Hills FC,Away,No,L,1,5,2.49,1.82,49,20,17,Rain,,,
+S07,2026-04-19,Sunday,5:00 PM,Houston Bayou SC,Home,No,L,2,3,2.16,1.04,64,22,10,Hot and humid,Fan giveaway,8402,35
+S08,2026-04-26,Sunday,5:00 PM,Raleigh Oaks,Away,No,L,0,1,1.91,1.29,51,16,10,Clear night,,,
+S09,2026-05-02,Saturday,7:30 PM,Jacksonville Surf,Home,No,W,2,1,2.55,0.68,49,18,5,Sunny,Fan giveaway,,35
+S10,2026-05-08,Friday,7:30 PM,Savannah Port FC,Away,No,W,2,1,1.48,1.37,48,21,12,Clear night,,,
+S10,2026-05-08,Friday,7:30 PM,Savannah Port FC,Away,No,W,2,1,1.48,1.37,48,21,12,Clear night,,,
+S11,2026-05-15,Friday,7:30 PM,Memphis Blues SC,Home,No,W,6,0,2.63,0.21,49,19,3,Clear night,None,9003,35
+S12,2026-05-23,Saturday,7:30 PM,Louisville City Lights,Away,No,L,1,3,1.87,1.94,40,22,16,Sunny,,,
+S13,2026-05-30,Saturday,7:30 PM,Birmingham Iron,Home,No,D,2,2,2.58,1.05,152,26,12,Clear night,None,8302,42
+S14,2026-06-10,Wednesday,7:30 PM,New Orleans Krewe,Away,No,D,3,3,1.7,1.05,62,18,6,Sunny,,,
+S15,2026-06-13,Saturday,7:30 PM,Richmond Rebels,Home,No,W,1,0,1.51,1.23,61,11,11,Clear night,Fireworks,9058,32
+S16,2026-06-20,Saturday,7:30 PM,Palm Beach United,Away,Yes,L,0,3,1.17,1.48,50,12,14,Sunny,,,
+S17,2026-06-27,Saturday,7:30 PM,Sarasota Keys FC,Home,No,W,3,1,1.62,0.68,52,17,9,Sunny,None,6984,42
+S18,2026-07-03,Friday,7:30 PM,Orlando Pines SC,Home,Yes,W,4,2,2.05,1.01,54,13,8,Sunny,Fan giveaway,10599,46
+S19,2026-07-11,Saturday,7:30 PM,Tampa Harbor FC,Away,No,L,0,1,1.38,1.29,47,14,12,Clear night,,,
+S20,2026-07-19,Sunday,5:00 PM,Atlanta Forge,Home,No,L,0,3,1.18,2.35,52,11,18,Sunny,Fan giveaway,8237,32
+S21,2026-07-25,Saturday,7:30 PM,Charlotte Crowns,Away,No,W,2,1,1.56,1.64,56,20,19,Clear night,,,
+S22,2026-07-31,Friday,7:30 PM,Nashville Rhythm,Home,No,W,1,0,1.46,0.75,52,14,5,Clear night,None,8839,42
+S23,2026-08-12,Wednesday,7:30 PM,Austin Hills FC,Away,No,L,0,1,1.36,1.33,51,18,7,Hot and humid,,,
+S24,2026-08-15,Saturday,7:30 PM,Houston Bayou SC,Home,No,W,4,0,2.08,0.64,57,18,4,Rain,Heritage night,7542,38
+S25,2026-08-22,Saturday,7:30 PM,Raleigh Oaks,home,No,D,3,3,1.83,1.81,54,22,17,Clear night,,,
+S26,2026-08-29,Saturday,7:30 PM,Jacksonville Surf,Home,No,D,1,1,2.07,0.63,62,15,11,Rain,None,7958,32
+S27,2026-09-05,Saturday,7:30 PM,Savannah Port FC,Away,No,D,1,1,1.11,1.47,55,11,14,Clear night,,,
+S28,2026-09-16,Wednesday,7:30 PM,Memphis Blues SC,Home,No,L,2,3,1.19,1.15,55,13,12,Clear night,None,6990,38
+S29,2026-09-19,Saturday,7:30 PM,Louisville City Lights,Away,No,L,0,2,0.65,1.93,43,6,15,Hot and humid,,,
+S30,2026-09-26,Saturday,7:30 PM,Birmingham Iron,Home,No,D,0,0,2.14,1.21,61,21,12,Clear night,Fan giveaway,9411,32
+S31,2026-10-07,Wednesday,7:30 PM,New Orleans Krewe,Away,No,L,-1,1,1.24,0.72,45,15,6,Clear night,,,
+S32,2026-10-11,Sunday,5:00 PM,Richmond Rebels,Home,No,W,2,1,1.72,1.16,55,14,14,Clear night,Heritage night,7894,38
+S33,2026-10-17,Saturday,7:30 PM,Palm Beach United,Away,Yes,L,0,3,0.93,1.36,44,9,17,Sunny,,,
+S34,2026-10-23,Friday,7:30 PM,Sarasota Keys FC,Home,No,D,1,1,1.79,1.19,55,14,14,Sunny,None,7599,38
